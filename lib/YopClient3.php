@@ -26,66 +26,14 @@ class YopClient3
 
     }
 
-    public function __set($name, $value)
-    {
-        // TODO: Implement __set() method.
-        $this->$name = $value;
-
-    }
-
-    public function __get($name)
-    {
-        // TODO: Implement __get() method.
-        return $this->$name;
-    }
-
-    static public function get($methodOrUri, $YopRequest)
-    {
-        $content = YopClient3::getForString($methodOrUri, $YopRequest);
-        $response = YopClient3::unmarshal($content);
-        YopClient3::handleRsaResult($YopRequest, $response, $content);
-        return $response;
-
-    }
-
-    static public function getForString($methodOrUri, $YopRequest)
-    {
-        $serverUrl = YopClient3::richRequest($methodOrUri, $YopRequest);
-        YopClient::signAndEncrypt($YopRequest);
-        $YopRequest->absoluteURL = $serverUrl;
-        $YopRequest->encoding();
-        $serverUrl .= (strpos($serverUrl, '?') === false ? '?' : '&') . $YopRequest->toQueryString();
-        $response = YopClient3::getRestTemplate($serverUrl, $YopRequest, "GET");
-        return $response;
-    }
-
-    public static function post($methodOrUri, $YopRequest)
-    {
-
-        $content = YopClient3::postString($methodOrUri, $YopRequest);
-
-        $response = YopClient3::unmarshal($content);
-
-
-        YopClient3::handleRsaResult($YopRequest, $response, $content);
-        return $response;
-
-    }
-
     /**
      * @param $methodOrUri
      * @param $YopRequest
-     * @return type
+     * @param $encode_data
+     * @return array
      */
-    public static function postString($methodOrUri, $YopRequest)
+    public static function SignRsaParameter($methodOrUri, $YopRequest)
     {
-
-
-        $serverUrl = YopClient3::richRequest($methodOrUri, $YopRequest);
-
-
-        $YopRequest->absoluteURL = $serverUrl;
-
         $appKey = $YopRequest->{$YopRequest->Config->APP_KEY};
         if (empty($appKey)) {
             $appKey = $YopRequest->Config->CUSTOMER_NO;
@@ -114,6 +62,7 @@ class YopClient3
 
         $authString = $protocolVersion . "/" . $appKey . "/" . $timestamp . "/" . $EXPIRED_SECONDS;
 
+
         $headersToSignSet = array();
 
         array_push($headersToSignSet, "x-yop-request-id");
@@ -129,6 +78,7 @@ class YopClient3
             array_push($headersToSignSet, "x-yop-customerid");
         }
 
+
         // Formatting the URL with signing protocol.
         $canonicalURI = HttpUtils::getCanonicalURIPath($methodOrUri);
 
@@ -140,6 +90,7 @@ class YopClient3
 
         // Formatting the headers from the request based on signing protocol.
         $canonicalHeader = YopClient3::getCanonicalHeaders($headersToSign);
+
 
         $signedHeaders = "";
         if ($headersToSignSet != null) {
@@ -154,6 +105,7 @@ class YopClient3
 
         // Signing the canonical request using key with sha-256 algorithm.
 
+
         if (empty($YopRequest->secretKey)) {
             error_log("secretKey must be specified");
         }
@@ -162,29 +114,102 @@ class YopClient3
 
         $private_key = $YopRequest->secretKey;
 
+
         $private_key = "-----BEGIN RSA PRIVATE KEY-----\n" .
             wordwrap($private_key, 64, "\n", true) .
             "\n-----END RSA PRIVATE KEY-----";
 
+
         /* 提取私钥 */
         $privateKey = openssl_pkey_get_private($private_key);
 
+
         ($privateKey) or die('密钥不可用');
+
         $signToBase64 = "";
 
-
         openssl_sign($canonicalRequest, $encode_data, $privateKey, "SHA256");
+
 
         openssl_free_key($privateKey);
 
         $signToBase64 = Base64Url::encode($encode_data);
 
+
         $signToBase64 .= '$SHA256';
 
 
         $headers['Authorization'] = "YOP-RSA2048-SHA256 " . $protocolVersion . "/" . $appKey . "/" . $timestamp . "/" . $EXPIRED_SECONDS . "/" . $signedHeaders . "/" . $signToBase64;
+        return $headers;
+    }
+
+    public function __set($name, $value)
+    {
+        // TODO: Implement __set() method.
+        $this->$name = $value;
+
+    }
+
+    public function __get($name)
+    {
+        // TODO: Implement __get() method.
+        return $this->$name;
+    }
+
+    static public function get($methodOrUri, $YopRequest){
+        $content = YopClient3::getForString($methodOrUri, $YopRequest);
+        $response = YopClient3::unmarshal($content);
+        YopClient3::handleRsaResult($YopRequest, $response, $content);
+        return $response;
+
+    }
+    static public function getForString($methodOrUri, $YopRequest){
+        $serverUrl = YopClient3::richRequest($methodOrUri, $YopRequest);
+        YopClient::signAndEncrypt($YopRequest);
+        $YopRequest->absoluteURL = $serverUrl;
+        $YopRequest->encoding();
+        $serverUrl .= (strpos($serverUrl,'?') === false ?'?':'&') . $YopRequest->toQueryString();
+        $response = YopClient3::getRestTemplate($serverUrl,$YopRequest,"GET");
+        return $response;
+    }
+
+    public static function post($methodOrUri, $YopRequest)
+    {
+
+        $content = YopClient3::postString($methodOrUri, $YopRequest);
+
+        $response = YopClient3::unmarshal($content);
+
+
+        YopClient3::handleRsaResult($YopRequest, $response, $content);
+        return $response;
+
+    }
+
+    /**
+     * @param $methodOrUri
+     * @param $YopRequest
+     * @return type
+     */
+    public static function postString($methodOrUri, $YopRequest)
+    {
+
+
+        $serverUrl = YopClient3::richRequest($methodOrUri, $YopRequest);
+
+
+
+
+        $YopRequest->absoluteURL = $serverUrl;
+
+        $headers = self::SignRsaParameter($methodOrUri, $YopRequest);
+
+
 
         $response = YopClient3::getRestTemplate($serverUrl, $YopRequest, "POST", $headers);
+
+        echo  $response;
+
         return $response;
     }
 
@@ -305,17 +330,48 @@ class YopClient3
      */
     static public function upload($methodOrUri, $YopRequest)
     {
-        $content = YopClient::uploadForString($methodOrUri, $YopRequest);
-        $response = YopClient::unmarshal($content);
+        $content = YopClient3::uploadForString($methodOrUri, $YopRequest);
+
+        $content = json_encode($content);
+        $response = YopClient3::unmarshal($content);
         YopClient3::handleResult($YopRequest, $response, $content);
         return $response;
     }
 
+    static public function uploadForString($methodOrUri, $YopRequest)
+    {
+
+        $serverUrl = YopClient3::richRequest($methodOrUri, $YopRequest);
+
+        //$alternate = file_get_contents($YopRequest->getParam("_file"));
+
+        //YopClient3::signAndEncrypt($YopRequest);
+
+        $strTemp = $YopRequest->getParam("_file");
+
+        $YopRequest->removeParam("_file");
+
+        $headers = self::SignRsaParameter($methodOrUri, $YopRequest);
+
+        $YopRequest->addParam("_file",$strTemp);
+
+        //$YopRequest->addParam("_file",str_replace('file:','@',$strTemp));PUT
+        // Create a CURLFile object
+        //$cfile = curl_file_create($file);
+
+        //echo $YopRequest->getParam("_file");
+
+
+        $YopRequest->absoluteURL = $serverUrl;
+
+        $response = YopClient3::getRestTemplate($serverUrl, $YopRequest, "PUT",$headers);
+        return $response;
+    }
 
     public static function unmarshal($content)
     {
 
-        $jsoncontent = json_decode($content, true);
+        $jsoncontent= json_decode($content,true);
 
         /*
          *
@@ -377,16 +433,16 @@ class YopClient3
     static public function getRestTemplate($serverUrl, $YopRequest, $method, $headers)
     {
         $YopRequest->encoding();
-        //$YopRequest->addParam("_file", $YopRequest->ImagePath);
+
         if ($method == "GET") {
             return HttpRequest::curl_request($serverUrl, '', $YopRequest->Config->connectTimeout, true);
         } elseif ($method == "PUT") {
-
-            return HttpRequest::curl_request($serverUrl, $YopRequest->paramMap, $YopRequest->Config->connectTimeout, true, true);
+            //$YopRequest->addParam("_file", $YopRequest->ImagePath);
+            return HttpRequest::curl_request($serverUrl, $YopRequest->paramMap, $YopRequest->Config->connectTimeout, true, true,$headers);
         }
 
 
-        return HttpRequest::curl_request($serverUrl, $YopRequest->paramMap, $YopRequest->Config->connectTimeout, false, true, $headers);
+        return HttpRequest::curl_request($serverUrl, $YopRequest->paramMap, $YopRequest->Config->connectTimeout, false, false, $headers);
     }
 
     static public function signAndEncrypt($YopRequest)
@@ -524,10 +580,10 @@ class YopClient3
         $YopResponse->format = $YopRequest->format;
         $ziped = '';
 
-        if (strtoupper($YopResponse->state) == 'SUCCESS') {
-            $strResult = YopClient3::getBizResult($content, $YopRequest->format);
+       if (strtoupper($YopResponse->state) == 'SUCCESS') {
+            $strResult =YopClient3::getBizResult($content, $YopRequest->format);
 
-            $ziped = $strResult;
+            $ziped =$strResult;
 
             if (!empty($ziped) && empty($YopResponse->error)) {
                 $YopResponse->stringResult = $strResult;
@@ -535,14 +591,15 @@ class YopClient3
         }
 
 
-        $YopResponse->validSign = YopClient3::isValidRsaResult($ziped, $YopResponse->sign, $YopRequest->yopPublicKey);
+
+        $YopResponse->validSign= YopClient3::isValidRsaResult($ziped, $YopResponse->sign,$YopRequest->yopPublicKey);
     }
 
 
     /**
      * 对业务结果签名进行校验
      */
-    public static function isValidRsaResult($result, $sign, $public_key)
+    public static function isValidRsaResult($result, $sign,$public_key)
     {
 
         $sb = "";
@@ -552,29 +609,23 @@ class YopClient3
             $sb .= trim($result);
         }
 
-        //echo $public_key;
-
         $public_key = "-----BEGIN PUBLIC KEY-----\n" .
             wordwrap($public_key, 64, "\n", true) .
             "\n-----END PUBLIC KEY-----";
 
 
+
         $pu_key = openssl_pkey_get_public($public_key);
 
 
-        $sb = preg_replace("/[\s]{2,}/", "", $sb);
+        $sb= preg_replace("/[\s]{2,}/","",$sb);
 
-        $sb = str_replace(PHP_EOL, "", $sb);
+        $sb= str_replace(PHP_EOL,"",$sb);
 
-        $sb = str_replace(" ", "", $sb);
-
-        //echo $sb;
-
-        //echo substr($sign,0,-7);
+        $sb= str_replace(" ","",$sb);
 
 
-        $res = openssl_verify($sb, Base64Url::decode(substr($sign, 0, -7)), $pu_key, "SHA256"); //验证
-        //echo "verify sig result:".$res; //输出验证结果，1：验证成功，0：验证失败
+        $res = openssl_verify($sb,Base64Url::decode(substr($sign,0,-7)), $pu_key,"SHA256"); //验证
 
         openssl_free_key($pu_key);
 
@@ -588,7 +639,7 @@ class YopClient3
 
     private function getBizResult($content, $format)
     {
-        if (empty($format)) {
+       if (empty($format)) {
             return $content;
         }
         switch ($format) {
@@ -598,10 +649,10 @@ class YopClient3
                 $result = strstr($content, '"result"');
 
                 $length = strlen('"result"');
-                $result = substr($result, $length + 3);
+                $result =  substr($result, $length+3);
 
-                $result = substr($result, 0, strrpos($result, '"ts"'));
-                $result = substr($result, 0, strlen($result) - 4);
+                $result = substr($result,0,strrpos($result,'"ts"'));
+                $result = substr($result,0,strlen($result)-4);
 
                 return $result;
 
@@ -610,12 +661,12 @@ class YopClient3
                 $result = strstr($content, '"</state>"');
 
                 $length = strlen('</state>');
-                $result = substr($result, $length + 4);
+                $result =  substr($result, $length+4);
 
 
-                $result = substr($result, 0, strrpos($result, '"ts"'));
+                $result = substr($result,0,strrpos($result,'"ts"'));
 
-                $result = substr($result, 0, -2);
+                $result =  substr($result, 0, -2);
 
                 return $result;
         }
@@ -632,73 +683,7 @@ class YopClient3
         return $prefix . $uuid;
     }
 
-    function encrypt_rsa($data, $pu_key)
-    {
-        $encode_data = "";
-        $split = str_split($data, 100);// 1024bit && OPENSSL_PKCS1_PADDING  不大于117即可
-        foreach ($split as $part) {
-            $isOkay = openssl_private_encrypt($part, $en_data, $pu_key);
-            if (!$isOkay) {
-                return false;
-            }
-            // echo strlen($en_data),'<br/>';
-            $encode_data .= base64_encode($en_data);
-        }
-        return $encode_data;
-    }
 
 
-    function decrypt_rsa($data, $pi_key)
-    {
-        $decode_data = "";
-        $split = str_split($data, 172);// 1024bit  固定172
-        foreach ($split as $part) {
-            $isOkay = openssl_public_decrypt(base64_decode($part), $de_data, $pi_key);// base64在这里使用，因为172字节是一组，是encode来的
-            if (!$isOkay) {
-                return false;
-            }
-            $decode_data .= $de_data;
-        }
-        return $decode_data;
-    }
-
-
-    /**
-     * $str 原始中文字符串
-     * $encoding 原始字符串的编码，默认GBK
-     * $prefix 编码后的前缀，默认"&#"
-     * $postfix 编码后的后缀，默认";"
-     */
-    function unicode_encode($str, $encoding = 'GBK', $prefix = '&#', $postfix = ';')
-    {
-        $str = iconv($encoding, 'UCS-2', $str);
-        $arrstr = str_split($str, 2);
-        $unistr = '';
-        for ($i = 0, $len = count($arrstr); $i < $len; $i++) {
-            $dec = hexdec(bin2hex($arrstr[$i]));
-            $unistr .= $prefix . $dec . $postfix;
-        }
-        return $unistr;
-    }
-
-    /**
-     * $str Unicode编码后的字符串
-     * $decoding 原始字符串的编码，默认GBK
-     * $prefix 编码字符串的前缀，默认"&#"
-     * $postfix 编码字符串的后缀，默认";"
-     */
-    function unicode_decode($unistr, $encoding = 'GBK', $prefix = '&#', $postfix = ';')
-    {
-        $arruni = explode($prefix, $unistr);
-        $unistr = '';
-        for ($i = 1, $len = count($arruni); $i < $len; $i++) {
-            if (strlen($postfix) > 0) {
-                $arruni[$i] = substr($arruni[$i], 0, strlen($arruni[$i]) - strlen($postfix));
-            }
-            $temp = intval($arruni[$i]);
-            $unistr .= ($temp < 256) ? chr(0) . chr($temp) : chr($temp / 256) . chr($temp % 256);
-        }
-        return iconv('UCS-2', $encoding, $unistr);
-    }
 
 }

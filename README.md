@@ -1,8 +1,43 @@
-# YOP PHP SDK
+当前版本:V1.0.0  生成时间:2017-09-02 12:47:10
+===========================
 
-## 安装php的mcrypt扩展 openssl
+###########环境依赖
+php v5.5+
+安装php的mcrypt扩展 openssl
 
-```
+###########部署步骤
+1. 添加php的mcrypt扩展 openssl
+
+
+###########目录结构描述
+|
+├── lib                         // 函数库
+│   ├── AESEncrypter.php        // AES函数集
+│   ├── Base64Url.php           // Base64Url函数集
+│   ├── BlowfishEncrypter.php   // 加解密处理
+│   ├── HttpRequest.php         // Http请求函数集
+│   ├── HttpUtils.php           // Http处理共通函数集
+│   ├── StringBuilder.php       // 字符串创建函数集
+│   ├── StringUtils             // 字符串处理函数集
+│   └── YopSignUtils.php        // YOP签名共通函数集
+├── YopClient.php               // 对称秘钥请求处理函数集
+├── YopClient3.php              // 非对称秘钥请求处理函数集
+├── YopConfig.php               // YOP配置信息函数集
+├── YopRequest.php              // YOP请求处理函数集
+├── YopResponse.php             // YOP返回处理函数集
+├── test                        // 测试
+│   ├── info.php                // PHP环境测试页面
+│   └── Test.php                // 测试程序页面
+├── Readme.txt                  // help
+
+###########V1.0.0 版本内容更新
+1. 新功能	 aaaaaaaaa
+2. 新功能	 bbbbbbbbb
+3. 新功能	 ccccccccc
+4. 新功能	 ddddddddd
+
+
+
 POST /yop-center/rest/v1.0/paperorder/api/pay/query HTTP/1.1
 Accept: text/plain, application/json, application/*+json, */*
 Content-Type: application/x-www-form-urlencoded

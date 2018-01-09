@@ -1,12 +1,12 @@
 <?php
 
 /**
+ * Created by PhpStorm.
  * User: wilson
  * Date: 16/7/22
  * Time: 15:04
  */
-class YopResponse
-{
+class YopResponse{
     /**
      * 状态(SUCCESS/FAILURE)
      */
@@ -52,15 +52,12 @@ class YopResponse
     public $verSign;
 
 
-    public function __set($name, $value)
-    {
+    public function __set($name, $value){
         // TODO: Implement __set() method.
         $this->$name = $value;
 
     }
-
-    public function __get($name)
-    {
+    public function __get($name){
         // TODO: Implement __get() method.
         return $this->$name;
     }

@@ -1,6 +1,7 @@
 <?php
 
 /**
+ * Created by PhpStorm.
  * User: wilson
  * Date: 16/7/11
  * Time: 16:58
@@ -8,8 +9,7 @@
 
 require_once("YopConfig.php");
 
-class YopRequest
-{
+class YopRequest {
     public $Config;
 
     public $format = 'json';
@@ -17,7 +17,7 @@ class YopRequest
     public $locale = "zh_CN";
     public $version = "1.0";
     public $ImagePath = '';
-    public $signAlg;
+    public $signAlg ;
     /**
      * 商户编号，易宝商户可不注册开放应用(获取appKey)也可直接调用API
      */
@@ -64,96 +64,84 @@ class YopRequest
      * 临时变量，请求绝对路径
      */
     public $absoluteURL;
-
-    public function __set($name, $value)
-    {
+    public function __set($name, $value){
         // TODO: Implement __set() method.
         $this->$name = $value;
 
     }
-
-    public function __get($name)
-    {
+    public function __get($name){
         // TODO: Implement __get() method.
         return $this->$name;
     }
-
     /**
      * 格式
-     * @param string $format 设置格式:xml 或者 json
+     * @param string $format	设置格式:xml 或者 json
      */
-    public function setFormat($format)
-    {
-        if (!empty($format)) {
+    public function setFormat($format) {
+        if(!empty($format)){
             $this->format = $format;
 
             $this->paramMap[$this->Config->FORMAT] = $this->format;
         }
     }
-
-    public function setSignRet($signRet)
-    {
-        $signRetStr = $signRet ? 'true' : 'false';
+    public function setSignRet($signRet) {
+        $signRetStr = $signRet?'true':'false';
         $this->signRet = $signRet;
         $this->addParam($this->Config->SIGN_RETURN, $signRetStr);
     }
-
-    public function setEncrypt($encrypt)
-    {
+    public function setEncrypt($encrypt) {
         $this->encrypt = $encrypt;
     }
-
-    public function setSignAlg($signAlg)
-    {
+    public function setSignAlg($signAlg) {
         $this->signAlg = $signAlg;
     }
 
-    public function setLocale($locale)
-    {
+    public function setLocale($locale) {
         $this->locale = $locale;
         $this->paramMap[$this->Config->LOCALE] = $this->locale;
     }
 
 
-    public function setVersion($version)
-    {
+    public function setVersion($version) {
         $this->version = $version;
         $this->paramMap[$this->Config->VERSION] = $this->version;
 
     }
 
-    public function setMethod($method)
-    {
+    public function setMethod($method) {
         $this->method = $method;
         //$this->Config->METHOD = $this->method;
         $this->paramMap[$this->Config->METHOD] = $this->method;
     }
 
 
-    public function __construct($appKey = '', $secretKey, $serverRoot = '', $yopPublicKey = null)
-    { //定义构造函数
-        $this->Config = new YopConfig();
+    public function __construct($appKey='', $secretKey,$serverRoot='',$yopPublicKey=null){ //定义构造函数
+        $this->Config  = new YopConfig();
         $this->signAlg = $this->Config->ALG_SHA1;
 
-        if (!empty($appKey)) {
+        if(!empty($appKey)){
             $this->appKey = $appKey;
-        } else {
+        }
+        else{
             $this->appKey = $this->Config->appKey;
         }
-        if (!empty($secretKey)) {
+        if(!empty($secretKey)){
             $this->secretKey = $secretKey;
-        } else {
+        }
+        else{
             $this->secretKey = $this->Config->getSecret();
         }
-        if (!empty($yopPublicKey)) {
+        if(!empty($yopPublicKey)){
             $this->yopPublicKey = $yopPublicKey;
-        } else {
+        }
+        else{
             $this->yopPublicKey = $this->Config->getSecret();
         }
 
-        if (!empty($serverRoot)) {
+        if(!empty($serverRoot)){
             $this->serverRoot = $serverRoot;
-        } else {
+        }
+        else{
             $this->serverRoot = $this->Config->serverRoot;
         }
 
@@ -167,35 +155,27 @@ class YopRequest
 
 
     }
-
-    public function addParam($key, $values, $ignoreSign = false)
-    {
-        if ($ignoreSign) {
-            $addParam = array($key => $values);
-            $this->ignoreSignParams = array_merge($this->ignoreSignParams, $addParam);
+    public function addParam($key,$values,$ignoreSign =false){
+        if($ignoreSign){
+            $addParam = array($key=>$values);
+            $this->ignoreSignParams = array_merge($this->ignoreSignParams,$addParam);
         }
-        $addParam = array($key => $values);
-        $this->paramMap = array_merge($this->paramMap, $addParam);
+        $addParam = array($key=>$values);
+        $this->paramMap = array_merge($this->paramMap,$addParam);
     }
-
-    public function removeParam($key)
-    {
-        foreach ($this->paramMap as $k => $v) {
-            if ($key == $k) {
+    public function removeParam($key){
+        foreach ($this->paramMap as $k => $v){
+            if($key == $k){
                 unset($this->paramMap[$k]);
             }
         }
 
     }
-
-    public function getParam($key)
-    {
+    public function getParam($key){
         return $this->paramMap[$key];
     }
-
-    public function encoding()
-    {
-        foreach ($this->paramMap as $k => $v) {
+    public function encoding(){
+        foreach ($this->paramMap as $k=>$v){
             $this->paramMap[$k] = urlencode($v);
         }
     }
@@ -205,12 +185,11 @@ class YopRequest
      *
      *
      */
-    public function toQueryString()
-    {
-        $StrQuery = "";
-        foreach ($this->paramMap as $k => $v) {
-            $StrQuery .= strlen($StrQuery) == 0 ? "" : "&";
-            $StrQuery .= $k . "=" . urlencode($v);
+    public function toQueryString(){
+        $StrQuery="";
+        foreach ($this->paramMap as $k=>$v){
+           $StrQuery .= strlen($StrQuery) == 0 ? "" : "&";
+            $StrQuery.=$k."=".urlencode($v);
         }
         return $StrQuery;
     }
