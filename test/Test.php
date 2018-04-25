@@ -31,7 +31,6 @@ function T1(){
     }
     //取得返回结果
     print_r($response->stringResult);
-
 }
 
 

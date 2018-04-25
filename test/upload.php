@@ -1,16 +1,7 @@
 <?php
-/**
- * User: yp-tc-7176
- * Date: 17/8/5
- * Time: 13:59
- */
-// Path to the file we want to upload
-
-echo exec('whoami');
 
 $uploaddir = getcwd();
 $file = $uploaddir . "/1.jpeg"; //这里非常重要！一定要绝对地址才行，所以使用这个拼接成了绝对地址
-echo $file;
 
 echo $file;
 

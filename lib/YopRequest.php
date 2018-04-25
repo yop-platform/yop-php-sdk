@@ -1,21 +1,14 @@
 <?php
-
-/**
- * Created by PhpStorm.
- * User: wilson
- * Date: 16/7/11
- * Time: 16:58
- */
-
 require_once("YopConfig.php");
 
 class YopRequest {
     public $Config;
 
     public $format = 'json';
+    public $httpMethod;
     public $method;
     public $locale = "zh_CN";
-    public $version = "1.0";
+    public $version = "2.0.0";
     public $ImagePath = '';
     public $signAlg ;
     /**
@@ -23,6 +16,7 @@ class YopRequest {
      */
     public $customerNo;
     public $paramMap = array();
+    public $jsonParam;
     public $ignoreSignParams = array('sign');
     /**
      * 报文是否加密，如果请求加密，则响应也加密，需做解密处理
@@ -101,11 +95,9 @@ class YopRequest {
         $this->paramMap[$this->Config->LOCALE] = $this->locale;
     }
 
-
     public function setVersion($version) {
         $this->version = $version;
         $this->paramMap[$this->Config->VERSION] = $this->version;
-
     }
 
     public function setMethod($method) {
@@ -113,7 +105,6 @@ class YopRequest {
         //$this->Config->METHOD = $this->method;
         $this->paramMap[$this->Config->METHOD] = $this->method;
     }
-
 
     public function __construct($appKey='', $secretKey,$serverRoot='',$yopPublicKey=null){ //定义构造函数
         $this->Config  = new YopConfig();
@@ -152,9 +143,8 @@ class YopRequest {
         $this->paramMap[$this->Config->LOCALE] = $this->locale;
         $this->paramMap[$this->Config->TIMESTAMP] = 123456;
         //$this->paramMap[$this->Config->TIMESTAMP] = time();
-
-
     }
+
     public function addParam($key,$values,$ignoreSign =false){
         if($ignoreSign){
             $addParam = array($key=>$values);
@@ -163,17 +153,27 @@ class YopRequest {
         $addParam = array($key=>$values);
         $this->paramMap = array_merge($this->paramMap,$addParam);
     }
+
     public function removeParam($key){
         foreach ($this->paramMap as $k => $v){
             if($key == $k){
                 unset($this->paramMap[$k]);
             }
         }
-
     }
+
     public function getParam($key){
         return $this->paramMap[$key];
     }
+
+    public function setJsonParam($jsonParam){
+        $this->jsonParam = $jsonParam;
+    }
+
+    public function getJsonParam(){
+        return $this->jsonParam;
+    }
+
     public function encoding(){
         foreach ($this->paramMap as $k=>$v){
             $this->paramMap[$k] = urlencode($v);
@@ -182,8 +182,6 @@ class YopRequest {
 
     /**
      * 将参数转换成k=v拼接的形式
-     *
-     *
      */
     public function toQueryString(){
         $StrQuery="";
