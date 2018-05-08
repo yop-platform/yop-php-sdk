@@ -8,7 +8,7 @@ class YopRequest {
     public $httpMethod;
     public $method;
     public $locale = "zh_CN";
-    public $version = "2.0.0";
+    public $version = "1.0";
     public $ImagePath = '';
     public $signAlg ;
     /**

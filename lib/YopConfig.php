@@ -24,7 +24,6 @@ class YopConfig{
 
 
     // 保护参数
-    public $CLIENT_VERSION = "2.0.0";
     public $ENCODING = "UTF-8";
     public $SUCCESS = "SUCCESS";
     public $CALLBACK = "callback";
