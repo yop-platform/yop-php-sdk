@@ -1,8 +1,43 @@
-# YOP PHP SDK
+当前版本:V1.0.0  生成时间:2017-09-02 12:47:10
+===========================
 
-## 安装php的mcrypt扩展 openssl
+###########环境依赖
+php v5.5+
+安装php的mcrypt扩展 openssl
 
-```
+###########部署步骤
+1. 添加php的mcrypt扩展 openssl
+
+
+###########目录结构描述
+|
+├── lib                         // 函数库
+│   ├── AESEncrypter.php        // AES函数集
+│   ├── Base64Url.php           // Base64Url函数集
+│   ├── BlowfishEncrypter.php   // 加解密处理
+│   ├── HttpRequest.php         // Http请求函数集
+│   ├── HttpUtils.php           // Http处理共通函数集
+│   ├── StringBuilder.php       // 字符串创建函数集
+│   ├── StringUtils             // 字符串处理函数集
+│   └── YopSignUtils.php        // YOP签名共通函数集
+├── YopClient.php               // 对称秘钥请求处理函数集
+├── YopClient3.php              // 非对称秘钥请求处理函数集
+├── YopConfig.php               // YOP配置信息函数集
+├── YopRequest.php              // YOP请求处理函数集
+├── YopResponse.php             // YOP返回处理函数集
+├── test                        // 测试
+│   ├── info.php                // PHP环境测试页面
+│   └── Test.php                // 测试程序页面
+├── Readme.txt                  // help
+
+###########V1.0.0 版本内容更新
+1. 新功能	 aaaaaaaaa
+2. 新功能	 bbbbbbbbb
+3. 新功能	 ccccccccc
+4. 新功能	 ddddddddd
+
+
+
 POST /yop-center/rest/v1.0/paperorder/api/pay/query HTTP/1.1
 Accept: text/plain, application/json, application/*+json, */*
 Content-Type: application/x-www-form-urlencoded
@@ -17,14 +52,13 @@ Content-Length: 233
 ```
 
 ```
-0owN80Vs39386sSSi7B76wa7497P41gZ3G4b8971V8R8sc6lS7ns4FA2846TcustomerNo10040020578formatjsonlocalezh_CNmerchantno10040020578method/rest/v1.0/paperorder/api/pay/queryrequestnoYOP-SDK-1471601751370signRettruets1471601751342v1.00owN80Vs39386sSSi7B76wa7497P41gZ3G4b8971V8R8sc6lS7ns4FA2846T
+0owN80Vs39386sSSi7B76wa7497P41gZ3G4b8971V8R8sc6lS7ns4FA2846TcustomerNo10040020578formatjsonlocalezh_CNmerchantno10040020578method/rest/v1.0/paperorder/api/pay/queryrequestnoYOP-SDK-1471601751370ts1471601751342v1.00owN80Vs39386sSSi7B76wa7497P41gZ3G4b8971V8R8sc6lS7ns4FA2846T
 ```
 
 ```
 format=json
 locale=zh_CN
 ts=1471601751342
-signRet=true
 customerNo=10040020578
 sign=0e65894ea9f91213f6991a5c81fa23b4ed1345e13f31d0fb43d0a1831760a3f7
 encrypt=C%252FG0UURN6jufCiZP0aeDgcSkdpQHXn8JqlIrxxBsrW1LOLTTmWpXSUHOpcDoBWda2WBzJYEBH
@@ -32,7 +66,7 @@ encrypt=C%252FG0UURN6jufCiZP0aeDgcSkdpQHXn8JqlIrxxBsrW1LOLTTmWpXSUHOpcDoBWda2WBz
 
 
 ```
-0owN80Vs39386sSSi7B76wa7497P41gZ3G4b8971V8R8sc6lS7ns4FA2846TcustomerNo10040020578formatjsonlocalezh_CNmerchantno10040020578method/rest/v1.0/paperorder/api/pay/queryrequestnoYOP-SDK-1471601751370signRettruets1471601751342v1.00owN80Vs39386sSSi7B76wa7497P41gZ3G4b8971V8R8sc6lS7ns4FA2846T
+0owN80Vs39386sSSi7B76wa7497P41gZ3G4b8971V8R8sc6lS7ns4FA2846TcustomerNo10040020578formatjsonlocalezh_CNmerchantno10040020578method/rest/v1.0/paperorder/api/pay/queryrequestnoYOP-SDK-1471601751370ts1471601751342v1.00owN80Vs39386sSSi7B76wa7497P41gZ3G4b8971V8R8sc6lS7ns4FA2846T
 0004b49b668fba3e3c8d88bce978419227468281646b9c03ea174b2158c7ad18
 ```
 
@@ -41,7 +75,6 @@ appKey=
 format=json
 locale=zh_CN
 ts=1471599539977
-signRet=true
 customerNo=10040020578
 sign=0004b49b668fba3e3c8d88bce978419227468281646b9c03ea174b2158c7ad18
 encrypt=jqIh5ikW6033NV6jQ9o5XJaOJ5czDmd2MiOUkTtoBeyOaI7lglVF58bh1LEuRqoxMpWKooEUYRnDD6jOe28TvQ%253D%253D

@@ -1,18 +1,11 @@
 <?php
-
-/**
- * User: wilson
- * Date: 16/7/11
- * Time: 16:58
- */
-
 require_once("YopConfig.php");
 
-class YopRequest
-{
+class YopRequest {
     public $Config;
 
     public $format = 'json';
+    public $httpMethod;
     public $method;
     public $locale = "zh_CN";
     public $version = "1.0";
@@ -23,15 +16,11 @@ class YopRequest
      */
     public $customerNo;
     public $paramMap = array();
+    public $jsonParam;
     public $ignoreSignParams = array('sign');
-    /**
-     * 报文是否加密，如果请求加密，则响应也加密，需做解密处理
-     */
-    public $encrypt = false;
-    /**
-     * 业务结果是否签名，默认不签名
-     */
-    public $signRet = false;
+
+    public $requestId;
+
     /**
      * 连接超时时间
      */
@@ -56,163 +45,149 @@ class YopRequest
      * 可支持不同请求使用不同的appKey及secretKey、serverRoot,secretKey只用于本地签名，不会被提交
      */
     public $yopPublicKey;
+
     /**
      * 可支持不同请求使用不同的appKey及secretKey、serverRoot,secretKey只用于本地签名，不会被提交
      */
     public $serverRoot;
+
     /**
      * 临时变量，请求绝对路径
      */
     public $absoluteURL;
 
-    public function __set($name, $value)
-    {
+    public function __set($name, $value){
         // TODO: Implement __set() method.
         $this->$name = $value;
 
     }
-
-    public function __get($name)
-    {
+    public function __get($name){
         // TODO: Implement __get() method.
         return $this->$name;
     }
 
-    /**
-     * 格式
-     * @param string $format 设置格式:xml 或者 json
-     */
-    public function setFormat($format)
-    {
-        if (!empty($format)) {
-            $this->format = $format;
-
-            $this->paramMap[$this->Config->FORMAT] = $this->format;
-        }
+    public function setSignRet($signRet) {
+        // do nothing
     }
 
-    public function setSignRet($signRet)
-    {
-        $signRetStr = $signRet ? 'true' : 'false';
-        $this->signRet = $signRet;
-        $this->addParam($this->Config->SIGN_RETURN, $signRetStr);
+    public function setEncrypt($encrypt) {
+        // do nothing
     }
 
-    public function setEncrypt($encrypt)
-    {
-        $this->encrypt = $encrypt;
-    }
-
-    public function setSignAlg($signAlg)
-    {
+    public function setSignAlg($signAlg) {
         $this->signAlg = $signAlg;
     }
 
-    public function setLocale($locale)
-    {
+    public function setLocale($locale) {
         $this->locale = $locale;
         $this->paramMap[$this->Config->LOCALE] = $this->locale;
     }
 
-
-    public function setVersion($version)
-    {
+    public function setVersion($version) {
         $this->version = $version;
         $this->paramMap[$this->Config->VERSION] = $this->version;
-
     }
 
-    public function setMethod($method)
-    {
+    public function setMethod($method) {
         $this->method = $method;
         //$this->Config->METHOD = $this->method;
         $this->paramMap[$this->Config->METHOD] = $this->method;
     }
 
-
-    public function __construct($appKey = '', $secretKey, $serverRoot = '', $yopPublicKey = null)
-    { //定义构造函数
-        $this->Config = new YopConfig();
+    public function __construct($appKey='', $secretKey, $yopPublicKey=null, $serverRoot=null) { //定义构造函数
+        $this->Config  = new YopConfig();
         $this->signAlg = $this->Config->ALG_SHA1;
+        $this->requestId = YopRequest::uuid();
 
-        if (!empty($appKey)) {
+        if(!empty($appKey)){
             $this->appKey = $appKey;
-        } else {
+        }
+        else{
             $this->appKey = $this->Config->appKey;
         }
-        if (!empty($secretKey)) {
+        if(!empty($secretKey)){
             $this->secretKey = $secretKey;
-        } else {
+        }
+        else{
             $this->secretKey = $this->Config->getSecret();
         }
-        if (!empty($yopPublicKey)) {
+        if(!empty($yopPublicKey)){
             $this->yopPublicKey = $yopPublicKey;
-        } else {
+        }
+        else{
             $this->yopPublicKey = $this->Config->getSecret();
         }
 
-        if (!empty($serverRoot)) {
+        if(!empty($serverRoot)){
             $this->serverRoot = $serverRoot;
-        } else {
+        }
+        else{
             $this->serverRoot = $this->Config->serverRoot;
         }
 
         //初始化数组
         $this->paramMap[$this->Config->APP_KEY] = $this->appKey;
-        //$this->paramMap[$this->Config->FORMAT] = $this->format;
         $this->paramMap[$this->Config->VERSION] = $this->version;
         $this->paramMap[$this->Config->LOCALE] = $this->locale;
-        $this->paramMap[$this->Config->TIMESTAMP] = 123456;
-        //$this->paramMap[$this->Config->TIMESTAMP] = time();
-
-
+        $this->paramMap[$this->Config->TIMESTAMP] = time();
     }
 
-    public function addParam($key, $values, $ignoreSign = false)
-    {
-        if ($ignoreSign) {
-            $addParam = array($key => $values);
-            $this->ignoreSignParams = array_merge($this->ignoreSignParams, $addParam);
+    public function addParam($key,$values,$ignoreSign =false){
+        if($ignoreSign){
+            $addParam = array($key=>$values);
+            $this->ignoreSignParams = array_merge($this->ignoreSignParams,$addParam);
         }
-        $addParam = array($key => $values);
-        $this->paramMap = array_merge($this->paramMap, $addParam);
+        $addParam = array($key=>$values);
+        $this->paramMap = array_merge($this->paramMap,$addParam);
     }
 
-    public function removeParam($key)
-    {
-        foreach ($this->paramMap as $k => $v) {
-            if ($key == $k) {
+    public function removeParam($key){
+        foreach ($this->paramMap as $k => $v){
+            if($key == $k){
                 unset($this->paramMap[$k]);
             }
         }
-
     }
 
-    public function getParam($key)
-    {
+    public function getParam($key){
         return $this->paramMap[$key];
     }
 
-    public function encoding()
-    {
-        foreach ($this->paramMap as $k => $v) {
+    public function setJsonParam($jsonParam){
+        $this->jsonParam = $jsonParam;
+    }
+
+    public function getJsonParam(){
+        return $this->jsonParam;
+    }
+
+    public function encoding(){
+        foreach ($this->paramMap as $k=>$v){
             $this->paramMap[$k] = urlencode($v);
         }
     }
 
     /**
      * 将参数转换成k=v拼接的形式
-     *
-     *
      */
-    public function toQueryString()
-    {
-        $StrQuery = "";
-        foreach ($this->paramMap as $k => $v) {
+    public function toQueryString(){
+        $StrQuery="";
+        foreach ($this->paramMap as $k=>$v){
             $StrQuery .= strlen($StrQuery) == 0 ? "" : "&";
-            $StrQuery .= $k . "=" . urlencode($v);
+            $StrQuery.=$k."=".urlencode($v);
         }
         return $StrQuery;
     }
+
+    private function uuid($prefix = '')
+        {
+            $chars = md5(uniqid(mt_rand(), true));
+            $uuid = substr($chars, 0, 8) . '-';
+            $uuid .= substr($chars, 8, 4) . '-';
+            $uuid .= substr($chars, 12, 4) . '-';
+            $uuid .= substr($chars, 16, 4) . '-';
+            $uuid .= substr($chars, 20, 12);
+            return $prefix . $uuid;
+        }
 
 }
