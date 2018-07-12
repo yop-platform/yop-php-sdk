@@ -1,11 +1,5 @@
 <?php
 
-/**
- * Created by PhpStorm.
- * User: wilson
- * Date: 16/7/11
- * Time: 17:06
- */
 class YopConfig{
     //app config
     
@@ -21,7 +15,6 @@ class YopConfig{
     public $ALG_AES = "AES";
     public $ALG_SHA = "SHA";
     public $ALG_SHA1 = "SHA1";
-
 
     // 保护参数
     public $ENCODING = "UTF-8";
@@ -41,19 +34,16 @@ class YopConfig{
     public $VERSION = "v";
     // 签名的默认参数名
     public $SIGN = "sign";
-    // 返回结果是否签名
-    public $SIGN_RETURN = "signRet";
+
     // 商户编号
     public $CUSTOMER_NO = "customerNo";
-    // 加密报文key
-    public $ENCRYPT = "encrypt";
+
     // 时间戳
     public $TIMESTAMP = "ts";
     public $publicED_KEY=array();
 
-
     public function __construct(){
-        array_push($this->publicED_KEY,$this->APP_KEY, $this->VERSION, $this->SIGN, $this->METHOD, $this->FORMAT, $this->LOCALE, $this->SESSION_ID, $this->CUSTOMER_NO, $this->ENCRYPT, $this->SIGN_RETURN, $this->TIMESTAMP );
+        array_push($this->publicED_KEY,$this->APP_KEY, $this->VERSION, $this->SIGN, $this->METHOD, $this->FORMAT, $this->LOCALE, $this->SESSION_ID, $this->CUSTOMER_NO, "", false, $this->TIMESTAMP );
     }
 
     public function __set($name, $value){
@@ -66,21 +56,19 @@ class YopConfig{
         return $this->$name;
     }
 
-
     public function getSecret(){
-
         if(!empty($this->appKey) && strlen($this->appKey) > 0){
             return $this->aesSecretKey;
         }else{
             return $this->hmacSecretKey;
         }
     }
+
     public function ispublicedKey($key){
         if(in_array($key,$this->publicED_KEY)){
                 return true;
         }
         return false;
-
     }
 
 }

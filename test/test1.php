@@ -15,8 +15,6 @@ function test1()
     $yop_public_key = 'MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA6p0XWjscY+gsyqKRhw9MeLsEmhFdBRhT2emOck/F1Omw38ZWhJxh9kDfs5HzFJMrVozgU+SJFDONxs8UB0wMILKRmqfLcfClG9MyCNuJkkfm0HFQv1hRGdOvZPXj3Bckuwa7FrEXBRYUhK7vJ40afumspthmse6bs6mZxNn/mALZ2X07uznOrrc2rk41Y2HftduxZw6T4EmtWuN2x4CZ8gwSyPAW5ZzZJLQ6tZDojBK4GZTAGhnn3bg5bBsBlw2+FLkCQBuDsJVsFPiGh/b6K/+zGTvWyUcu+LUj2MejYQELDO3i2vQXVDk7lVi2/TcUYefvIcssnzsfCfjaorxsuwIDAQAB';
 
     $request = new YopRequest("OPR:10014929805", $private_key, "http://open.yeepay.com/yop-center", $yop_public_key);
-    //$request->setFormat(true);
-    // $request->setSignRet(true);
     $request->addParam("parentMerchantNo", "10014929805");
     $request->addParam("merchantNo", "10014929805");
     $request->addParam("orderId", "18253166342");
@@ -38,7 +36,7 @@ function test1()
         echo "返回结果签名验证成功!";
         //  print()
     }
-    print_r($response->stringResult);
+    print_r($response->result);
 }
 
 function test2()
@@ -47,10 +45,7 @@ function test2()
     $request = new YopRequest("",
         "8intulgnqibv77f1t8q9j0hhlkiy6ei6c82sknv63vib3zhgyzl8uif9ky7",
         "http://172.17.102.173:8064/yop-center");
-    $request->setFormat(true);
-    $request->setSignRet(true);
     $request->addParam("customerNo", "10040011444a");
-    $request->addParam("requestId", "123");
     $request->addParam("platformUserNo", "8880222");
 
     // print_r($request);
@@ -77,7 +72,6 @@ function test3()
     $request->setEncrypt(true);
     $request->addParam("customerNo", "211287279703");
     $request->addParam("platformUserNo", "211287279703");
-    $request->addParam("requestId", "123456789");
     //print_r($request);
     //print_r("\n\n\n\n\n\n");
     $response = YopClient::post("/rest/v1.0/member/queryAccount", $request);
@@ -90,7 +84,6 @@ function test4()
     $request = new YopRequest("",
         "J58961W1061051gx1R7n80s76UHA2499oe51881iWx1Rgu8TV20bY2M7l52", "http://open.yeepay.com/yop-center");
     $request->setEncrypt(true);
-    $request->setSignRet(true);
     $request->addParam("customerNo", "10040020578d");
     $request->addParam("merchantno", "10040020578");
     $request->addParam("yborderid", "124");
@@ -104,10 +97,8 @@ function test5()
     $request = new YopRequest("",
         "s5KI8r0920SQ339oVlFE6eWJ0yk019SD7015nw39iaXJp10856z0C1d7JV5", "http://open.yeepay.com/yop-center");
     $request->setEncrypt(true);
-    $request->setSignRet(true);
     $request->addParam("customerNo", "10011830665l");
     $request->addParam("customernumber", "10012544672");
-    $request->addParam("requestid", time());
     $request->addParam("amount", "0.1");
     $request->addParam("callbackurl", "http://www.baidu.com");
     $request->addParam("webcallbackurl", "http://www.baidu.com");
@@ -122,7 +113,6 @@ function test6()
     $request = new YopRequest("",
         "0owN80Vs39386sSSi7B76wa7497P41gZ3G4b8971V8R8sc6lS7ns4FA2846", "http://10.151.30.88:8064/yop-center");
     $request->setEncrypt(true);
-    $request->setSignRet(true);
     $request->setSignAlg("sha256");
     $request->addParam("customerNo", "10040020578T");
     $request->addParam("merchantno", "10040020578");
@@ -139,7 +129,6 @@ function T1()
     $request = new YopRequest("sdk-develop", $secretKey, "http://open.yeepay.com/yop-center");
 
     $request->setEncrypt(true);
-    $request->setSignRet(true);
     $request->setSignAlg("sha1");
     #$request->addParam("appKey", "B112345678901237");
     $request->addParam("fileType", "IMAGE");
@@ -158,7 +147,6 @@ function T2()
         "8intulgnqibv77f1t8q9j0hhlkiy6ei6c82sknv63vib3zhgyzl8uif9ky7",
         "http://10.151.30.87:8064/yop-center");
     $request->setEncrypt(true);
-    $request->setSignRet(true);
     $request->setSignAlg("sha1");
     $request->addParam("customerNo", "10040011444a");
     $request->addParam("fileType", "IMAGE");
@@ -174,10 +162,8 @@ function T3()
     $request = new YopRequest("neices",
         "LQ2YEfJq8PPRJXR/03nQ0Q==", "http://10.151.30.88:8064/yop-center");
     $request->setEncrypt(true);
-    $request->setSignRet(true);
     $request->setSignAlg("sha1");
     $request->addParam("customerNo", "10040011444");
-    $request->addParam("requestId", "124");
     $request->addParam("platformUserNo", "8880222");
 
     $response = YopClient::post("/rest/v1.0/member/queryAccount", $request);
@@ -187,14 +173,11 @@ function T3()
 //Post 对称
 function T4()
 {
-
     $secretKey = "purc4lI/VsThnnL0Yu4g1A==";
 
     $request = new YopRequest("sdk-develop", $secretKey, "http://open.yeepay.com/yop-center");
 
-
     $request->setEncrypt(true);
-    $request->setSignRet(true);
     $request->setSignAlg("sha256");
     $request->addParam("request_flow_id", "12345678");//请求流水标识
     $request->addParam("name", "张文康");//请求流水标识
@@ -206,19 +189,16 @@ function T4()
     if ($response->validSign == 1) {
         echo "返回结果签名验证成功!";
     }
-    print_r($response->stringResult);
-
+    print_r($response->result);
 }
 
 //Post 非对称
 function T5()
 {
-
     /*测试私钥*/
     $private_key = "";
     /*测试公钥*/
     $yop_public_key = '';
-
 
     $request = new YopRequest("sdk-develop", $private_key, "http://open.yeepay.com/yop-center", $yop_public_key);
     $request->addParam("request_flow_id", "12345678");//请求流水标识
@@ -229,7 +209,6 @@ function T5()
     $request->addParam("name", "张文康");//请求流水标识
     $request->addParam("id_card_number", "370982199101186691");//请求流水标识
 
-
     $response = YopClient3::post("/rest/v1.0/test/auth/idcard", $request);
     //print_r($request);
     //print_r($response);
@@ -237,21 +216,17 @@ function T5()
         echo "返回结果签名验证成功!";
     }
 
-    print_r($response->stringResult);
-
+    print_r($response->result);
 }
 
 //Get 对称
 function T8()
 {
-
     $secretKey = "purc4lI/VsThnnL0Yu4g1A==";
 
     $request = new YopRequest("sdk-develop", $secretKey, "http://open.yeepay.com/yop-center");
 
-
     $request->setEncrypt(true);
-    $request->setSignRet(true);
     $request->setSignAlg("sha256");
     $request->addParam("request_flow_id", "12345678");//请求流水标识
     $request->addParam("name", "张文康");//请求流水标识
@@ -263,8 +238,7 @@ function T8()
     if ($response->validSign == 1) {
         echo "返回结果签名验证成功!";
     }
-    print_r($response->stringResult);
-
+    print_r($response->result);
 }
 
 //T5();

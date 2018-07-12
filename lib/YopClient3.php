@@ -36,11 +36,10 @@ class YopClient3
         date_default_timezone_set('PRC');
         $dataTime = new DateTime();
         $timestamp = $dataTime->format(DateTime::ISO8601); // Works the same since const ISO8601 = "Y-m-d\TH:i:sO"
-        $requestId = YopClient3::uuid();//Returns like ‘1225c695-cfb8-4ebb-aaaa-80da344e8352′
 
         $headers = array();
 
-        $headers['x-yop-request-id'] = $requestId;
+        $headers['x-yop-request-id'] = $YopRequest->requestId;
         $headers['x-yop-date'] = $timestamp;
 
         $protocolVersion = "yop-auth-v2";
@@ -111,6 +110,7 @@ class YopClient3
         $signToBase64 .= '$SHA256';
 
         $headers['Authorization'] = "YOP-RSA2048-SHA256 " . $protocolVersion . "/" . $appKey . "/" . $timestamp . "/" . $EXPIRED_SECONDS . "/" . $signedHeaders . "/" . $signToBase64;
+        $headers['x-yop-request-id'] = $YopRequest->requestId;
 
         return $headers;
     }
@@ -130,8 +130,7 @@ class YopClient3
 
     static public function get($methodOrUri, $YopRequest){
         $content = YopClient3::getForString($methodOrUri, $YopRequest);
-        $response = YopClient3::unmarshal($content);
-        YopClient3::handleRsaResult($YopRequest, $response, $content);
+        $response = YopClient3::handleRsaResult($YopRequest, $content);
         return $response;
     }
 
@@ -149,8 +148,7 @@ class YopClient3
     public static function post($methodOrUri, $YopRequest)
     {
         $content = YopClient3::postString($methodOrUri, $YopRequest);
-        $response = YopClient3::unmarshal($content);
-        YopClient3::handleRsaResult($YopRequest, $response, $content);
+        $response = YopClient3::handleRsaResult($YopRequest, $content);
         return $response;
     }
 
@@ -164,9 +162,9 @@ class YopClient3
         $YopRequest->httpMethod = "POST";
         $serverUrl = YopClient3::richRequest($methodOrUri, $YopRequest);
         $YopRequest->absoluteURL = $serverUrl;
+
         $headers = self::SignRsaParameter($methodOrUri, $YopRequest);
         $response = YopClient3::getRestTemplate($serverUrl, $YopRequest, "POST", $headers);
-        echo  $response;
         return $response;
     }
 
@@ -287,10 +285,7 @@ class YopClient3
     static public function upload($methodOrUri, $YopRequest)
     {
         $content = YopClient3::uploadForString($methodOrUri, $YopRequest);
-
-        $content = json_encode($content);
-        $response = YopClient3::unmarshal($content);
-        YopClient3::handleResult($YopRequest, $response, $content);
+        $response = YopClient3::handleRsaResult($YopRequest, $content);
         return $response;
     }
 
@@ -298,79 +293,17 @@ class YopClient3
     {
         $serverUrl = YopClient3::richRequest($methodOrUri, $YopRequest);
 
-        //$alternate = file_get_contents($YopRequest->getParam("_file"));
-
-        //YopClient3::signAndEncrypt($YopRequest);
-
         $strTemp = $YopRequest->getParam("_file");
-
         $YopRequest->removeParam("_file");
 
         $headers = self::SignRsaParameter($methodOrUri, $YopRequest);
 
         $YopRequest->addParam("_file",$strTemp);
 
-        //$YopRequest->addParam("_file",str_replace('file:','@',$strTemp));PUT
-        // Create a CURLFile object
-        //$cfile = curl_file_create($file);
-
-        //echo $YopRequest->getParam("_file");
-
-
         $YopRequest->absoluteURL = $serverUrl;
 
-        $response = YopClient3::getRestTemplate($serverUrl, $YopRequest, "PUT",$headers);
+        $response = YopClient3::getRestTemplate($serverUrl, $YopRequest, "PUT", $headers);
         return $response;
-    }
-
-    public static function unmarshal($content)
-    {
-        $jsoncontent= json_decode($content,true);
-
-        $YopResponse = new YopResponse();
-
-        if (!empty($jsoncontent['state'])) {
-            $YopResponse->state = $jsoncontent['state'];
-        }
-        if (!empty($jsoncontent['error'])) {
-            if (is_array($jsoncontent['error'])) {
-                foreach ($jsoncontent['error'] as $k => $v) {
-                    if (!is_array($v)) {
-                        $YopResponse->error .= (empty($YopResponse->error) ? '' : ',') . '"' . $k . '" : "' . $v . '"';
-                    } else {
-                        $YopResponse->error .= (empty($YopResponse->error) ? '' : ',') . '"' . $k . '" : "' . json_encode($v, JSON_UNESCAPED_UNICODE) . '"';
-                        foreach ($v as $vk => $vv) {
-
-                        }
-                    }
-
-                }
-
-            } else {
-                $YopResponse->error = $jsoncontent['error'];
-            }
-
-        }
-        if (!empty($jsoncontent['result'])) {
-            $YopResponse->result = $jsoncontent['result'];
-        }
-        if (!empty($jsoncontent['ts'])) {
-            $YopResponse->ts = $jsoncontent['ts'];
-        }
-        if (!empty($jsoncontent['sign'])) {
-            $YopResponse->sign = $jsoncontent['sign'];
-        }
-        if (!empty($jsoncontent['stringResult'])) {
-            $YopResponse->stringResult = $jsoncontent['stringResult'];
-        }
-        if (!empty($jsoncontent['format'])) {
-            $YopResponse->format = $jsoncontent['format'];
-        }
-        if (!empty($jsoncontent['validSign'])) {
-            $YopResponse->validSign = $jsoncontent['validSign'];
-        }
-
-        return $YopResponse;
     }
 
     static public function getRestTemplate($serverUrl, $YopRequest, $method, $headers)
@@ -378,7 +311,7 @@ class YopClient3
         $YopRequest->encoding();
 
         if ($method == "GET") {
-            return HttpRequest::curl_request($serverUrl, '', $YopRequest->Config->connectTimeout, true);
+            return HttpRequest::curl_request($serverUrl, '', $YopRequest->Config->connectTimeout, true, $headers);
         } elseif ($method == "PUT") {
             //$YopRequest->addParam("_file", $YopRequest->ImagePath);
             return HttpRequest::curl_request($serverUrl, $YopRequest->paramMap, $YopRequest->Config->connectTimeout, true, true, $headers);
@@ -436,120 +369,32 @@ class YopClient3
         return $serverUrl;
     }
 
-    public function handleResult($YopRequest, $YopResponse, $content)
+    public function handleRsaResult($YopRequest, $content)
     {
-        $YopResponse->format = $YopRequest->format;
-        $ziped = '';
-        if (strtoupper($YopResponse->state) == 'SUCCESS') {
-            $strResult = self::getBizResult($content, $YopRequest->format);
-            if (!empty($ziped) && $YopResponse->error == '') {
-                $YopResponse->stringResult = $strResult;
+        $response = new YopResponse();
+
+        $jsoncontent = json_decode($content);
+        $response->state = $jsoncontent->state;
+        $response->result = $jsoncontent->result;
+        $response->ts = $jsoncontent->ts;
+        $response->sign = $jsoncontent->sign;
+        $response->requestId = $YopRequest->requestId;
+
+        if(!empty($jsoncontent->error)){
+            if(is_array($jsoncontent->error)){
+                foreach ($jsoncontent->error as $k => $v) {
+                    if(!is_array($v)){
+                        $response->error .= (empty($response->error)?'':',') . '"'. $k .'" : "'.$v.'"';
+                    } else {
+                        $response->error .= (empty($response->error)?'':',') . '"'. $k .'" : "'.json_encode($v,JSON_UNESCAPED_UNICODE).'"';
+                    }
+                }
+            } else {
+                $response->error = $jsoncontent->error;
             }
         }
-        if ($YopRequest->signRet && !empty($YopRequest->sign)) {
-            $signStr = $YopResponse->state . $ziped . $YopResponse->ts;
-            $YopResponse->validSign = YopSignUtils::isValidResult($signStr, $YopRequest->secretKey, $YopRequest->signAlg, $YopResponse->sign);
-        } else {
-            $YopResponse->validSign = true;
-        }
-    }
 
-    public function handleRsaResult($YopRequest, $YopResponse, $content)
-    {
-        $YopResponse->format = $YopRequest->format;
-        $ziped = '';
-
-       if (strtoupper($YopResponse->state) == 'SUCCESS') {
-            $strResult =YopClient3::getBizResult($content, $YopRequest->format);
-
-            $ziped =$strResult;
-
-            if (!empty($ziped) && empty($YopResponse->error)) {
-                $YopResponse->stringResult = $strResult;
-            }
-        }
-        $YopResponse->validSign= YopClient3::isValidRsaResult($ziped, $YopResponse->sign,$YopRequest->yopPublicKey);
-    }
-
-    /**
-     * 对业务结果签名进行校验
-     */
-    public static function isValidRsaResult($result, $sign,$public_key)
-    {
-        $sb = "";
-        if ($result == null || empty($result)) {
-            $sb = "";
-        } else {
-            $sb .= trim($result);
-        }
-
-        $public_key = "-----BEGIN PUBLIC KEY-----\n" .
-            wordwrap($public_key, 64, "\n", true) .
-            "\n-----END PUBLIC KEY-----";
-
-        $pu_key = openssl_pkey_get_public($public_key);
-
-        $sb= preg_replace("/[\s]{2,}/","",$sb);
-
-        $sb= str_replace(PHP_EOL,"",$sb);
-
-        $sb= str_replace(" ","",$sb);
-
-        $res = openssl_verify($sb,Base64Url::decode(substr($sign,0,-7)), $pu_key,"SHA256"); //验证
-
-        openssl_free_key($pu_key);
-
-        if ($res == 1) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    private function getBizResult($content, $format)
-    {
-       if (empty($format)) {
-            return $content;
-        }
-        switch ($format) {
-            case 'json':
-                //preg_match('@"result" :(.+),"ts"@i', $content, $jsonStr);
-
-                $result = strstr($content, '"result"');
-
-                $length = strlen('"result"');
-                $result =  substr($result, $length+3);
-
-                $result = substr($result,0,strrpos($result,'"ts"'));
-                $result = substr($result,0,strlen($result)-4);
-
-                return $result;
-
-            default:
-                //preg_match('@</state>(.+)<ts>@i', $content, $xmlStr);
-                $result = strstr($content, '"</state>"');
-
-                $length = strlen('</state>');
-                $result =  substr($result, $length+4);
-
-
-                $result = substr($result,0,strrpos($result,'"ts"'));
-
-                $result =  substr($result, 0, -2);
-
-                return $result;
-        }
-    }
-
-    private function uuid($prefix = '')
-    {
-        $chars = md5(uniqid(mt_rand(), true));
-        $uuid = substr($chars, 0, 8) . '-';
-        $uuid .= substr($chars, 8, 4) . '-';
-        $uuid .= substr($chars, 12, 4) . '-';
-        $uuid .= substr($chars, 16, 4) . '-';
-        $uuid .= substr($chars, 20, 12);
-        return $prefix . $uuid;
+        return $response;
     }
 
 }
