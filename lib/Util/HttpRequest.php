@@ -2,8 +2,9 @@
 
 require_once("HttpUtils.php");
 
-define("VERSION","2.0.2");
-define("USERAGENT","php/".VERSION."/".PHP_OS."/".$_SERVER ['SERVER_SOFTWARE']."/Zend Framework/".zend_version()."/".PHP_VERSION."/".$_SERVER['HTTP_ACCEPT_LANGUAGE']."/");
+define("LANGS", "php");
+define("VERSION", "2.1.0");
+define("USERAGENT", LANGS."/".VERSION."/".PHP_OS."/".$_SERVER ['SERVER_SOFTWARE']."/Zend Framework/".zend_version()."/".PHP_VERSION."/".$_SERVER['HTTP_ACCEPT_LANGUAGE']."/");
 
 abstract class HTTPRequest{
 
@@ -33,14 +34,18 @@ abstract class HTTPRequest{
         $headerArray=array();
         if($headers!=null) {
             foreach ($headers as  $key => $value) {
-                array_push($headerArray,$key.":".$value);
+                array_push($headerArray, $key.":".$value);
             }
         }
+        array_push($headerArray, "x-yop-sdk-langs:".LANGS);
+        array_push($headerArray, "x-yop-sdk-version:".VERSION);
         if($jsonParam!=null) {
             array_push($headerArray,'Content-Type: application/json; charset=utf-8',
                                     'Content-Length: ' . strlen($jsonParam));
         }
         curl_setopt($curl, CURLOPT_HTTPHEADER,  $headerArray);
+
+        //var_dump($headerArray);
 
         if($post) {
             curl_setopt($curl, CURLOPT_POST, 1);

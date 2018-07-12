@@ -10,7 +10,7 @@ class YopRequest {
     public $locale = "zh_CN";
     public $version = "1.0";
     public $ImagePath = '';
-    public $signAlg ;
+    public $signAlg;
     /**
      * 商户编号，易宝商户可不注册开放应用(获取appKey)也可直接调用API
      */
@@ -18,14 +18,9 @@ class YopRequest {
     public $paramMap = array();
     public $jsonParam;
     public $ignoreSignParams = array('sign');
-    /**
-     * 报文是否加密，如果请求加密，则响应也加密，需做解密处理
-     */
-    public $encrypt = false;
-    /**
-     * 业务结果是否签名，默认不签名
-     */
-    public $signRet = false;
+
+    public $requestId;
+
     /**
      * 连接超时时间
      */
@@ -50,14 +45,17 @@ class YopRequest {
      * 可支持不同请求使用不同的appKey及secretKey、serverRoot,secretKey只用于本地签名，不会被提交
      */
     public $yopPublicKey;
+
     /**
      * 可支持不同请求使用不同的appKey及secretKey、serverRoot,secretKey只用于本地签名，不会被提交
      */
     public $serverRoot;
+
     /**
      * 临时变量，请求绝对路径
      */
     public $absoluteURL;
+
     public function __set($name, $value){
         // TODO: Implement __set() method.
         $this->$name = $value;
@@ -67,25 +65,15 @@ class YopRequest {
         // TODO: Implement __get() method.
         return $this->$name;
     }
-    /**
-     * 格式
-     * @param string $format	设置格式:xml 或者 json
-     */
-    public function setFormat($format) {
-        if(!empty($format)){
-            $this->format = $format;
 
-            $this->paramMap[$this->Config->FORMAT] = $this->format;
-        }
-    }
     public function setSignRet($signRet) {
-        $signRetStr = $signRet?'true':'false';
-        $this->signRet = $signRet;
-        $this->addParam($this->Config->SIGN_RETURN, $signRetStr);
+        // do nothing
     }
+
     public function setEncrypt($encrypt) {
-        $this->encrypt = $encrypt;
+        // do nothing
     }
+
     public function setSignAlg($signAlg) {
         $this->signAlg = $signAlg;
     }
@@ -106,9 +94,10 @@ class YopRequest {
         $this->paramMap[$this->Config->METHOD] = $this->method;
     }
 
-    public function __construct($appKey='', $secretKey,$serverRoot='',$yopPublicKey=null){ //定义构造函数
+    public function __construct($appKey='', $secretKey, $yopPublicKey=null, $serverRoot=null) { //定义构造函数
         $this->Config  = new YopConfig();
         $this->signAlg = $this->Config->ALG_SHA1;
+        $this->requestId = YopRequest::uuid();
 
         if(!empty($appKey)){
             $this->appKey = $appKey;
@@ -138,11 +127,9 @@ class YopRequest {
 
         //初始化数组
         $this->paramMap[$this->Config->APP_KEY] = $this->appKey;
-        //$this->paramMap[$this->Config->FORMAT] = $this->format;
         $this->paramMap[$this->Config->VERSION] = $this->version;
         $this->paramMap[$this->Config->LOCALE] = $this->locale;
-        $this->paramMap[$this->Config->TIMESTAMP] = 123456;
-        //$this->paramMap[$this->Config->TIMESTAMP] = time();
+        $this->paramMap[$this->Config->TIMESTAMP] = time();
     }
 
     public function addParam($key,$values,$ignoreSign =false){
@@ -186,10 +173,21 @@ class YopRequest {
     public function toQueryString(){
         $StrQuery="";
         foreach ($this->paramMap as $k=>$v){
-           $StrQuery .= strlen($StrQuery) == 0 ? "" : "&";
+            $StrQuery .= strlen($StrQuery) == 0 ? "" : "&";
             $StrQuery.=$k."=".urlencode($v);
         }
         return $StrQuery;
     }
+
+    private function uuid($prefix = '')
+        {
+            $chars = md5(uniqid(mt_rand(), true));
+            $uuid = substr($chars, 0, 8) . '-';
+            $uuid .= substr($chars, 8, 4) . '-';
+            $uuid .= substr($chars, 12, 4) . '-';
+            $uuid .= substr($chars, 16, 4) . '-';
+            $uuid .= substr($chars, 20, 12);
+            return $prefix . $uuid;
+        }
 
 }
