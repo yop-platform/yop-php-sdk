@@ -110,7 +110,6 @@ class YopClient3
         $signToBase64 .= '$SHA256';
 
         $headers['Authorization'] = "YOP-RSA2048-SHA256 " . $protocolVersion . "/" . $appKey . "/" . $timestamp . "/" . $EXPIRED_SECONDS . "/" . $signedHeaders . "/" . $signToBase64;
-        $headers['x-yop-request-id'] = $YopRequest->requestId;
 
         return $headers;
     }
@@ -317,7 +316,7 @@ class YopClient3
             return HttpRequest::curl_request($serverUrl, $YopRequest->paramMap, $YopRequest->Config->connectTimeout, true, true, $headers);
         }
 
-        return HttpRequest::curl_request($serverUrl, $YopRequest->paramMap, $YopRequest->Config->connectTimeout, $isJson, false, $headers, $YopRequest->jsonParam);
+        return HttpRequest::curl_request($serverUrl, $YopRequest->paramMap, $YopRequest->Config->connectTimeout, false, false, $headers, $YopRequest->jsonParam);
     }
 
     static public function signAndEncrypt($YopRequest)
