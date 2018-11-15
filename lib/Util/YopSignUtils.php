@@ -45,7 +45,7 @@ abstract class YopSignUtils{
                 //为key/value对生成一个keyvalue格式的字符串，并拼接到待签名字符串后面
 
                 //value不为空,则进行加密
-                if(!empty($v)){
+                if (!($v === NULL)) {
                     $str .= "$k$v";
                 }
 
