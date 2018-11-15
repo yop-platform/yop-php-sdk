@@ -1,6 +1,3 @@
-当前版本:V1.0.0  生成时间:2017-09-02 12:47:10
-===========================
-
 ###########环境依赖
 php v5.5+
 安装php的mcrypt扩展 openssl
@@ -29,12 +26,6 @@ php v5.5+
 │   ├── info.php                // PHP环境测试页面
 │   └── Test.php                // 测试程序页面
 ├── Readme.txt                  // help
-
-###########V1.0.0 版本内容更新
-1. 新功能	 aaaaaaaaa
-2. 新功能	 bbbbbbbbb
-3. 新功能	 ccccccccc
-4. 新功能	 ddddddddd
 
 
 
