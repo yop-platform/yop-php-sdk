@@ -3,7 +3,7 @@
 require_once("HttpUtils.php");
 
 define("LANGS", "php");
-define("VERSION", "2.1.0");
+define("VERSION", "2.1.2");
 define("USERAGENT", LANGS."/".VERSION."/".PHP_OS."/".$_SERVER ['SERVER_SOFTWARE']."/Zend Framework/".zend_version()."/".PHP_VERSION."/".$_SERVER['HTTP_ACCEPT_LANGUAGE']."/");
 
 abstract class HTTPRequest{
