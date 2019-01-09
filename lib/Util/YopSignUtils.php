@@ -32,7 +32,7 @@ abstract class YopSignUtils{
      *
      * @return string 返回参数签名值
      */
-    static function sign($params, $ignoreParamNames='', $secret, $algName='sha1'){
+    static function sign($params, $ignoreParamNames='', $secret, $algName='sha1',$debug=false){
         $str = '';  //待签名字符串
         //先将参数以其参数名的字典序升序进行排序
         $requestparams = $params;
@@ -56,7 +56,16 @@ abstract class YopSignUtils{
         $str = $secret.$str.$secret;
         //通过指定算法生成sing
 
-        return hash($algName,$str);
+        $signValue = hash($algName,$str);
+
+        var_dump($YopConfig);
+        if ($debug) {
+                    var_dump("algName=".$algName);
+                    var_dump("str=".$str);
+                    var_dump("signValue=".$signValue);
+        }
+
+        return $signValue;
     }
 
 
@@ -77,71 +86,6 @@ abstract class YopSignUtils{
            return false;
        }
 
-   }
-
-   static function decrypt($source,$private_Key, $public_Key)
-   {
-
-       $private_key = "-----BEGIN RSA PRIVATE KEY-----\n" .
-           wordwrap($private_Key, 64, "\n", true) .
-           "\n-----END RSA PRIVATE KEY-----";
-
-       extension_loaded('openssl') or die('php需要openssl扩展支持');
-
-
-       /* 提取私钥 */
-       $privateKey = openssl_get_privatekey($private_key);
-
-       ($privateKey) or die('密钥不可用');
-
-
-       //分解参数
-       $args = explode('$', $source);
-
-
-       if (count($args) != 4) {
-           die('source invalid : ');
-       }
-
-       $encryptedRandomKeyToBase64 = $args[0];
-       $encryptedDataToBase64 = $args[1];
-       $symmetricEncryptAlg = $args[2];
-       $digestAlg = $args[3];
-
-       //用私钥对随机密钥进行解密
-       openssl_private_decrypt(Base64Url::decode($encryptedRandomKeyToBase64), $randomKey, $privateKey);
-
-
-       openssl_free_key($privateKey);
-
-
-
-
-       $encryptedData = openssl_decrypt(Base64Url::decode($encryptedDataToBase64), "AES-128-ECB", $randomKey, OPENSSL_RAW_DATA);
-
-
-       //分解参数
-       $signToBase64=substr(strrchr($encryptedData,'$'),1);
-       $sourceData = substr($encryptedData,0,strlen($encryptedData)-strlen($signToBase64)-1);
-
-       $public_key = "-----BEGIN PUBLIC KEY-----\n" .
-           wordwrap($public_Key, 64, "\n", true) .
-           "\n-----END PUBLIC KEY-----";
-
-
-
-       $publicKey = openssl_pkey_get_public($public_key);
-
-       $res = openssl_verify($sourceData,Base64Url::decode($signToBase64), $publicKey,$digestAlg); //验证
-
-       openssl_free_key($publicKey);
-
-       //输出验证结果，1：验证成功，0：验证失败
-       if ($res == 1) {
-           return $sourceData;
-       } else {
-           Die("verifySign fail!");
-       }
    }
 
     static function signRsa($source,$private_Key)

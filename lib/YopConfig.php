@@ -2,13 +2,26 @@
 
 class YopConfig{
     //app config
-    
-    public $serverRoot = "https://open.yeepay.com/yop-center";
+
+    public $serverRoot = "https://openapi.yeepay.com/yop-center";
+    public $yosServerRoot = "https://yos.yeepay.com/yop-center";
+
+    //public $serverRoot = "http://ycetest.yeepay.com:30228/yop-center";
+    //public $yosServerRoot = "http://ycetest.yeepay.com:30228/yop-center";
+
+    //public $serverRoot = "http://127.0.0.1:8064/yop-center";
+    //public $yosServerRoot = "http://127.0.0.1:8064/yop-center";
+
     public $appKey;
     public $aesSecretKey;
     public $hmacSecretKey;
-    public $connectTimeout=30000;
-    public $readTimeout=60000;
+
+    public $debug=false;
+
+    public $connectTimeout=30;
+    public $readTimeout=60;
+
+    public $maxUploadLimit=4096000;
 
     //加密算法
     public $ALG_MD5 = "MD5";
@@ -47,12 +60,10 @@ class YopConfig{
     }
 
     public function __set($name, $value){
-      // TODO: Implement __set() method.
         $this->$name = $value;
 
     }
     public function __get($name){
-       // TODO: Implement __get() method.
         return $this->$name;
     }
 

@@ -1,0 +1,5 @@
+## 3.1.0
+
+[feat]/rest/v1.0/file/upload 已经废弃，老商户升级sdk时文件上传添加参数由 addParam 改为 addFile
+[fix]AES请求传递Authorization
+[fix]uuid 生成规则变更
