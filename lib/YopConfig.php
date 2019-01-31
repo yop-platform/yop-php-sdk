@@ -2,16 +2,28 @@
 
 class YopConfig{
     //app config
-    
-    public $serverRoot = "https://open.yeepay.com/yop-center";
+
+    public $serverRoot = "https://openapi.yeepay.com/yop-center";
+    public $yosServerRoot = "https://yos.yeepay.com/yop-center";
+
+    //public $serverRoot = "http://ycetest.yeepay.com:30228/yop-center";
+    //public $yosServerRoot = "http://ycetest.yeepay.com:30228/yop-center";
+
+    //public $serverRoot = "http://127.0.0.1:8064/yop-center";
+    //public $yosServerRoot = "http://127.0.0.1:8064/yop-center";
+
     public $appKey;
     public $aesSecretKey;
     public $hmacSecretKey;
-    public $connectTimeout=30000;
-    public $readTimeout=60000;
 
-    //加密算法
-    public $ALG_MD5 = "MD5";
+    public $debug=false;
+
+    public $connectTimeout=30;
+    public $readTimeout=60;
+
+    public $maxUploadLimit=4096000;
+
+    //签名算法
     public $ALG_AES = "AES";
     public $ALG_SHA = "SHA";
     public $ALG_SHA1 = "SHA1";
@@ -22,10 +34,7 @@ class YopConfig{
     public $CALLBACK = "callback";
     // 方法的默认参数名
     public $METHOD = "method";
-    // 格式化默认参数名
-    public $FORMAT = "format";
-    // 本地化默认参数名
-    public $LOCALE = "locale";
+
     // 会话id默认参数名
     public $SESSION_ID = "sessionId";
     // 应用键的默认参数名 ;
@@ -43,16 +52,14 @@ class YopConfig{
     public $publicED_KEY=array();
 
     public function __construct(){
-        array_push($this->publicED_KEY,$this->APP_KEY, $this->VERSION, $this->SIGN, $this->METHOD, $this->FORMAT, $this->LOCALE, $this->SESSION_ID, $this->CUSTOMER_NO, "", false, $this->TIMESTAMP );
+        array_push($this->publicED_KEY,$this->APP_KEY, $this->VERSION, $this->SIGN, $this->METHOD, $this->SESSION_ID, $this->CUSTOMER_NO, "", false);
     }
 
     public function __set($name, $value){
-      // TODO: Implement __set() method.
         $this->$name = $value;
 
     }
     public function __get($name){
-       // TODO: Implement __get() method.
         return $this->$name;
     }
 
