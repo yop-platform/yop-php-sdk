@@ -2,7 +2,6 @@
 
 require_once("YopRequest.php");
 require_once("YopResponse.php");
-require_once("Util/YopSignUtils.php");
 require_once("Util/HttpRequest.php");
 require_once("Util/StringUtils.php");
 require_once("Util/HttpUtils.php");
@@ -39,8 +38,8 @@ class YopRsaClient
 
         $headers = array();
 
+        $headers['x-yop-appkey'] = $YopRequest->appKey;
         $headers['x-yop-request-id'] = $YopRequest->requestId;
-        $headers['x-yop-date'] = $timestamp;
 
         $protocolVersion = "yop-auth-v2";
         $EXPIRED_SECONDS = "1800";
@@ -49,14 +48,10 @@ class YopRsaClient
 
         $headersToSignSet = array();
         array_push($headersToSignSet, "x-yop-request-id");
-        array_push($headersToSignSet, "x-yop-date");
 
         $appKey = $YopRequest->{$YopRequest->config->APP_KEY};
 
-        if (StringUtils::isBlank($YopRequest->config->CUSTOMER_NO)) {
-            $headers['x-yop-appkey'] = $appKey;
-            array_push($headersToSignSet, "x-yop-appkey");
-        } else {
+        if (!StringUtils::isBlank($YopRequest->config->CUSTOMER_NO)) {
             $headers['x-yop-customerid'] = $appKey;
             array_push($headersToSignSet, "x-yop-customerid");
         }
@@ -141,7 +136,6 @@ class YopRsaClient
     public static function getForString($methodOrUri, $YopRequest){
         $YopRequest->httpMethod = "GET";
         $serverUrl = YopRsaClient::richRequest($methodOrUri, $YopRequest);
-        YopClient::signAndEncrypt($YopRequest);
         $serverUrl .= (strpos($serverUrl,'?') === false ?'?':'&') . $YopRequest->toQueryString();
         
         self::SignRsaParameter($methodOrUri, $YopRequest);
@@ -238,9 +232,7 @@ class YopRsaClient
         $header = strtolower(trim($header));
         $defaultHeadersToSign = array();
         array_push($defaultHeadersToSign, "host");
-        array_push($defaultHeadersToSign, "content-length");
         array_push($defaultHeadersToSign, "content-type");
-        array_push($defaultHeadersToSign, "content-md5");
 
         return strpos($header, "x-yop-") == 0 || in_array($defaultHeadersToSign, $header);
     }
@@ -299,38 +291,8 @@ class YopRsaClient
 
         self::SignRsaParameter($methodOrUri, $YopRequest);
         $response = HttpRequest::curl_request($serverUrl, $YopRequest);
-        print_r($response);
+        //print_r($response);
         return $response;
-    }
-
-    public static function signAndEncrypt($YopRequest)
-    {
-        if (empty($YopRequest->method)) {
-            error_log("method must be specified");
-        }
-        if (empty($YopRequest->secretKey)) {
-            error_log("secretKey must be specified");
-        }
-
-        $appKey = $YopRequest->{$YopRequest->config->APP_KEY};
-        if (empty($appKey)) {
-            $appKey = $YopRequest->{$YopRequest->config->CUSTOMER_NO};
-            if (empty($appKey)) {
-                $appKey = $YopRequest->appKey;
-            }
-            $YopRequest->addParam($YopRequest->config->APP_KEY, $appKey);
-        }
-        if (empty($appKey)) {
-            error_log("appKey 与 customerNo 不能同时为空");
-        }
-
-        $signValue = YopSignUtils::sign($YopRequest->paramMap, $YopRequest->ignoreSignParams, $YopRequest->secretKey, $YopRequest->signAlg);
-
-        $YopRequest->addParam($YopRequest->config->SIGN, $signValue);
-        if ($YopRequest->isRest) {
-            $YopRequest->removeParam($YopRequest->config->METHOD);
-            $YopRequest->removeParam($YopRequest->config->VERSION);
-        }
     }
 
     static public function richRequest($methodOrUri, $YopRequest)
@@ -351,16 +313,19 @@ class YopRsaClient
         return $serverUrl;
     }
 
-    public function handleRsaResult($YopRequest, $content)
+    public function handleRsaResult($request, $content)
     {
-        $response = new YopResponse();
+        if ($request->downRequest) {
+            return $content;
+        }
 
+        $response = new YopResponse();
         $jsoncontent = json_decode($content);
         $response->state = $jsoncontent->state;
         $response->result = $jsoncontent->result;
         $response->ts = $jsoncontent->ts;
         $response->sign = $jsoncontent->sign;
-        $response->requestId = $YopRequest->requestId;
+        $response->requestId = $request->requestId;
 
         if(!empty($jsoncontent->error)){
             if(is_array($jsoncontent->error)){

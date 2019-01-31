@@ -4,13 +4,10 @@ require_once("YopConfig.php");
 class YopRequest {
     public $config;
 
-    public $format = 'json';
     public $httpMethod;
     public $method;
-    public $locale = "zh_CN";
     public $version = "1.0";
-    public $ImagePath = '';
-    public $signAlg;
+    public $signAlg = "sha256";
 
     /**
      * 商户编号，易宝商户可不注册开放应用(获取appKey)也可直接调用API
@@ -63,32 +60,20 @@ class YopRequest {
         return $this->$name;
     }
 
-    public function setSignRet($signRet) {
-        // do nothing
-    }
-
     public function setSignAlg($signAlg) {
         $this->signAlg = $signAlg;
     }
 
-    public function setLocale($locale) {
-        $this->locale = $locale;
-        $this->paramMap[$this->config->LOCALE] = $this->locale;
-    }
-
     public function setVersion($version) {
         $this->version = $version;
-        $this->paramMap[$this->config->VERSION] = $this->version;
     }
 
     public function setMethod($method) {
         $this->method = $method;
-        $this->paramMap[$this->config->METHOD] = $this->method;
     }
 
     public function __construct($appKey='', $secretKey=null, $yopPublicKey=null, $serverRoot=null) { //定义构造函数
         $this->config = new YopConfig();
-        $this->signAlg = $this->config->ALG_SHA1;
         $this->requestId = YopRequest::uuid();
 
         if(!empty($appKey)){
@@ -123,21 +108,12 @@ class YopRequest {
         else{
             $this->serverRoot = $this->config->yosServerRoot;
         }
-
-        //初始化数组
-        $this->paramMap[$this->config->APP_KEY] = $this->appKey;
-        $this->paramMap[$this->config->VERSION] = $this->version;
-        $this->paramMap[$this->config->LOCALE] = $this->locale;
-        $this->paramMap[$this->config->TIMESTAMP] = time();
     }
 
-    public function addParam($key,$values,$ignoreSign =false){
+    public function addParam($key,$values){
         if ("_file"==$key) {
             YopRequest::addFile($key,$values);
         } else {
-            if($ignoreSign){
-                $this->ignoreSignParams = array_push($this->ignoreSignParams,$key);
-            }
             $addParam = array($key=>$values);
             $this->paramMap = array_merge($this->paramMap,$addParam);
         }

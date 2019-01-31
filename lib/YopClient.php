@@ -72,25 +72,23 @@ class YopClient{
         if(empty($YopRequest->secretKey)){
             error_log("secretKey must be specified");
         }
-        $appKey =$YopRequest->{$YopRequest->config->APP_KEY};
+        $appKey =$YopRequest->appKey;
         if(empty($appKey)){
             $appKey = $YopRequest->config->CUSTOMER_NO;
-            $YopRequest->removeParam($YopRequest->config->APP_KEY);
         }
         if(empty($appKey)){
             error_log("appKey 与 customerNo 不能同时为空");
         }
 
-        $signValue="";
-        $signValue=YopSignUtils::sign($YopRequest->paramMap,$YopRequest->ignoreSignParams,$YopRequest->secretKey,$YopRequest->signAlg,$YopRequest->config->debug);
-
-        $YopRequest->addParam($YopRequest->config->SIGN,$signValue);
+        $toSignParamMap = array_merge($YopRequest->paramMap,array("v"=>$YopRequest->version, "method"=>$YopRequest->method));
+        $signValue=YopSignUtils::sign($toSignParamMap,$YopRequest->ignoreSignParams,$YopRequest->secretKey,$YopRequest->signAlg,$YopRequest->config->debug);
 
         date_default_timezone_set('PRC');
         $dataTime = new DateTime();
         $timestamp = $dataTime->format(DateTime::ISO8601); // Works the same since const ISO8601 = "Y-m-d\TH:i:sO"
 
         $headers = array();
+        $headers['x-yop-appkey'] = $appKey;
         $headers['x-yop-date'] = $timestamp;
         $headers['Authorization'] = "YOP-HMAC-AES128 " . $signValue;
 

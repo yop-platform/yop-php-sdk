@@ -1,9 +1,5 @@
 <?php
-/**
- * User: yp-tc-7176
- * Date: 17/8/5
- * Time: 14:00
- */
+
 print_r($_FILES);
 $uploaddir = getcwd() . '/tmp/'; //a directory inside
 echo $uploaddir . "<br />";

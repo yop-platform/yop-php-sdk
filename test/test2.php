@@ -1,10 +1,5 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: yp-tc-7176
- * Date: 17/11/23
- * Time: 19:59
- */
+
 require_once ("../lib/Util/YopSignUtils.php");
 
 function T1()

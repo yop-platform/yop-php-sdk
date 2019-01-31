@@ -3,7 +3,7 @@
 require_once("HttpUtils.php");
 
 define("LANGS", "php");
-define("VERSION", "3.1.0");
+define("VERSION", "3.1.1");
 define("USERAGENT", LANGS."/".VERSION."/".PHP_OS."/".$_SERVER ['SERVER_SOFTWARE']."/Zend Framework/".zend_version()."/".PHP_VERSION."/".$_SERVER['HTTP_ACCEPT_LANGUAGE']."/");
 
 abstract class HTTPRequest{
@@ -91,9 +91,19 @@ abstract class HTTPRequest{
         }
 
         $data = curl_exec($curl);
+        //var_dump($data);
+
         if (curl_errno($curl)) {
             return curl_error($curl);
         }
+
+        $responseHeaders = curl_getinfo($curl, CURLINFO_CONTENT_TYPE);
+        //print_r($responseHeaders);
+        //print_r(substr_compare($responseHeaders, "application/octet-stream", 0, 16));
+        if (!empty($responseHeaders) && substr_compare($responseHeaders, "application/octet-stream", 0, 16) == 0) {
+            $request->downRequest = true;
+        }
+
         curl_close($curl);
         return $data;
     }

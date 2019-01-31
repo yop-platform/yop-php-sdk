@@ -1,3 +1,9 @@
+## 3.1.1
+
+[feat]支持文件下载
+[feat]默认使用SHA256签名算法
+[fix]优化header
+
 ## 3.1.0
 
 [feat]/rest/v1.0/file/upload 已经废弃，老商户升级sdk时文件上传添加参数由 addParam 改为 addFile
