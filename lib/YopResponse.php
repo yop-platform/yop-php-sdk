@@ -14,11 +14,6 @@ class YopResponse{
     public $result;
 
     /**
-     * 时间戳
-     */
-    public $ts;
-
-    /**
      * 结果签名，签名算法为Request指定算法，示例：SHA(<secret>stringResult<secret>)
      */
     public $sign;
@@ -29,6 +24,22 @@ class YopResponse{
     public $error;
 
     public $requestId;
+
+    public function __set($name, $value){
+        $this->$name = $value;
+    }
+
+    public function __get($name){
+        return $this->$name;
+    }
+
+}
+
+class YopError {
+    public $code;
+    public $message;
+    public $subCode;
+    public $subMessage;
 
     public function __set($name, $value){
         $this->$name = $value;
