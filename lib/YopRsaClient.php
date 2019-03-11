@@ -313,32 +313,29 @@ class YopRsaClient
         return $serverUrl;
     }
 
-    public function handleRsaResult($request, $content)
-    {
+    public function handleRsaResult($YopRequest, $content){
         if ($request->downRequest) {
             return $content;
         }
 
         $response = new YopResponse();
-        $jsoncontent = json_decode($content);
-        $response->state = $jsoncontent->state;
-        $response->result = $jsoncontent->result;
-        $response->ts = $jsoncontent->ts;
-        $response->sign = $jsoncontent->sign;
-        $response->requestId = $request->requestId;
 
-        if(!empty($jsoncontent->error)){
-            if(is_array($jsoncontent->error)){
-                foreach ($jsoncontent->error as $k => $v) {
-                    if(!is_array($v)){
-                        $response->error .= (empty($response->error)?'':',') . '"'. $k .'" : "'.$v.'"';
-                    } else {
-                        $response->error .= (empty($response->error)?'':',') . '"'. $k .'" : "'.json_encode($v,JSON_UNESCAPED_UNICODE).'"';
-                    }
-                }
-            } else {
-                $response->error = $jsoncontent->error;
-            }
+        $jsoncontent = json_decode($content);
+        $response->requestId = $YopRequest->requestId;
+
+        if(!empty($jsoncontent->result)){
+            $response->state = "SUCCESS";
+            $response->result = $jsoncontent->result;
+            $response->sign = $jsoncontent->sign;
+        } else {
+            $response->state = "FAILURE";
+            $response->error = new YopError();
+            $response->error->code = $jsoncontent->code;
+            $response->error->message = $jsoncontent->message;
+            $response->error->subCode = $jsoncontent->subCode;
+            $response->error->subMessage = $jsoncontent->subMessage;
+
+            $response->sign = $jsoncontent->sign;
         }
 
         return $response;

@@ -2,12 +2,7 @@
 
 require_once("Base64Url.php");
 require_once("AESEncrypter.php");
-/**
- * Created by PhpStorm.
- * User: wilson
- * Date: 16/7/7
- * Time: 17:33
- */
+
 abstract class YopSignUtils{
 
     /**
@@ -57,11 +52,11 @@ abstract class YopSignUtils{
 
         $signValue = hash($algName,$str);
 
-        var_dump($YopConfig);
         if ($debug) {
-                    var_dump("algName=".$algName);
-                    var_dump("str=".$str);
-                    var_dump("signValue=".$signValue);
+            print_r($YopConfig);
+            var_dump("algName=".$algName);
+            var_dump("str=".$str);
+            var_dump("signValue=".$signValue);
         }
 
         return $signValue;
