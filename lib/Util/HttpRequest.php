@@ -81,7 +81,7 @@ abstract class HTTPRequest{
                                 $fields [$fileParam] = $file;
                             }
                             curl_setopt($curl, CURLOPT_INFILESIZE, $request->config->maxUploadLimit);
-                            curl_setopt($curl, CURLOPT_BUFFERSIZE, 128);
+                            //curl_setopt($curl, CURLOPT_BUFFERSIZE, 16kB);
                 }
                 curl_setopt($curl, CURLOPT_POSTFIELDS, $fields);
             }
