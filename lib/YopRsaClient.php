@@ -2,6 +2,7 @@
 
 require_once("YopRequest.php");
 require_once("YopResponse.php");
+require_once("YopError.php");
 require_once("Util/HttpRequest.php");
 require_once("Util/StringUtils.php");
 require_once("Util/HttpUtils.php");
