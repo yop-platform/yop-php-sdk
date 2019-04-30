@@ -3,7 +3,7 @@
 require_once("HttpUtils.php");
 
 define("LANGS", "php");
-define("VERSION", "3.1.2");
+define("VERSION", "3.1.3");
 define("USERAGENT", LANGS."/".VERSION."/".PHP_OS."/".$_SERVER ['SERVER_SOFTWARE']."/Zend Framework/".zend_version()."/".PHP_VERSION."/".$_SERVER['HTTP_ACCEPT_LANGUAGE']."/");
 
 abstract class HTTPRequest{
@@ -81,7 +81,7 @@ abstract class HTTPRequest{
                                 $fields [$fileParam] = $file;
                             }
                             curl_setopt($curl, CURLOPT_INFILESIZE, $request->config->maxUploadLimit);
-                            curl_setopt($curl, CURLOPT_BUFFERSIZE, 128);
+                            //curl_setopt($curl, CURLOPT_BUFFERSIZE, 16kB);
                 }
                 curl_setopt($curl, CURLOPT_POSTFIELDS, $fields);
             }

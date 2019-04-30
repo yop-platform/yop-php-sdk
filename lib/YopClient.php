@@ -2,6 +2,7 @@
 
 require_once("YopRequest.php");
 require_once("YopResponse.php");
+require_once("YopError.php");
 require_once("Util/YopSignUtils.php");
 require_once("Util/HttpRequest.php");
 
@@ -112,7 +113,7 @@ class YopClient{
         return $serverUrl;
     }
 
-    public function handleRsaResult($YopRequest, $content){
+    public function handleResult($YopRequest, $content){
         if ($request->downRequest) {
             return $content;
         }
