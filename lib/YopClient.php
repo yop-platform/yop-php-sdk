@@ -75,14 +75,14 @@ class YopClient{
         }
         $appKey =$YopRequest->appKey;
         if(empty($appKey)){
-            $appKey = $YopRequest->config->CUSTOMER_NO;
+            $appKey = YopConfig::$appKey;
         }
         if(empty($appKey)){
-            error_log("appKey 与 customerNo 不能同时为空");
+            error_log("appKey 不能为空");
         }
 
         $toSignParamMap = array_merge($YopRequest->paramMap,array("v"=>$YopRequest->version, "method"=>$YopRequest->method));
-        $signValue=YopSignUtils::sign($toSignParamMap,$YopRequest->ignoreSignParams,$YopRequest->secretKey,$YopRequest->signAlg,$YopRequest->config->debug);
+        $signValue=YopSignUtils::sign($toSignParamMap,$YopRequest->ignoreSignParams,$YopRequest->secretKey,$YopRequest->signAlg);
 
         date_default_timezone_set('PRC');
         $dataTime = new DateTime();
@@ -97,8 +97,8 @@ class YopClient{
     }
 
     static public function richRequest($methodOrUri, $YopRequest){
-        if(strpos($methodOrUri, $YopRequest->config->serverRoot)){
-            $methodOrUri = substr($methodOrUri,strlen($YopRequest->config->serverRoot)+1);
+        if(strpos($methodOrUri, YopConfig::$serverRoot)){
+            $methodOrUri = substr($methodOrUri,strlen(YopConfig::$serverRoot)+1);
         }
         $serverUrl = $YopRequest->serverRoot;
         $serverUrl .= $methodOrUri;
@@ -113,7 +113,7 @@ class YopClient{
         return $serverUrl;
     }
 
-    public function handleResult($YopRequest, $content){
+   static public function handleResult($YopRequest, $content){
         if ($request->downRequest) {
             return $content;
         }
@@ -136,6 +136,14 @@ class YopClient{
             $response->error->subMessage = $jsoncontent->subMessage;
 
             $response->sign = $jsoncontent->sign;
+        }
+
+        if (YopConfig::$debug) {
+            print_r($response);
+
+            if ($response->validSign == 1) {
+                echo "<br><br>"."返回结果签名验证成功!";
+            }
         }
 
         return $response;

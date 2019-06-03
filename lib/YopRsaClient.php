@@ -24,22 +24,21 @@ class YopRsaClient
      */
     public static function SignRsaParameter($methodOrUri, $YopRequest)
     {
-        $appKey = $YopRequest->{$YopRequest->config->APP_KEY};
-        if (empty($appKey)) {
-            $appKey = $YopRequest->config->CUSTOMER_NO;
-            $YopRequest->removeParam($YopRequest->config->APP_KEY);
+        $appKey =$YopRequest->appKey;
+        if(empty($appKey)){
+            $appKey = YopConfig::$appKey;
         }
-        if (empty($appKey)) {
-            error_log("appKey 与 customerNo 不能同时为空");
+        if(empty($appKey)){
+            error_log("appKey 不能为空");
         }
 
         date_default_timezone_set('PRC');
         $dataTime = new DateTime();
-        $timestamp = $dataTime->format(DateTime::ISO8601); // Works the same since const ISO8601 = "Y-m-d\TH:i:sO"
+        $timestamp = $dataTime->format("Ymd\THis\Z"); // Works the same since const ISO8601 = "Y-m-d\TH:i:sO"
 
         $headers = array();
 
-        $headers['x-yop-appkey'] = $YopRequest->appKey;
+        $headers['x-yop-appkey'] = $appKey;
         $headers['x-yop-request-id'] = $YopRequest->requestId;
 
         $protocolVersion = "yop-auth-v2";
@@ -49,13 +48,6 @@ class YopRsaClient
 
         $headersToSignSet = array();
         array_push($headersToSignSet, "x-yop-request-id");
-
-        $appKey = $YopRequest->{$YopRequest->config->APP_KEY};
-
-        if (!StringUtils::isBlank($YopRequest->config->CUSTOMER_NO)) {
-            $headers['x-yop-customerid'] = $appKey;
-            array_push($headersToSignSet, "x-yop-customerid");
-        }
 
         // Formatting the URL with signing protocol.
         $canonicalURI = HttpUtils::getCanonicalURIPath($methodOrUri);
@@ -95,19 +87,15 @@ class YopRsaClient
         $privateKey = openssl_pkey_get_private($private_key);// 提取私钥
         ($privateKey) or die('密钥不可用');
 
-        $signToBase64 = "";
-
         openssl_sign($canonicalRequest, $encode_data, $privateKey, "SHA256");
-
         openssl_free_key($privateKey);
 
         $signToBase64 = Base64Url::encode($encode_data);
-
         $signToBase64 .= '$SHA256';
 
         $headers['Authorization'] = "YOP-RSA2048-SHA256 " . $protocolVersion . "/" . $appKey . "/" . $timestamp . "/" . $EXPIRED_SECONDS . "/" . $signedHeaders . "/" . $signToBase64;
 
-        if ($YopRequest->config->debug) {
+        if (YopConfig::$debug) {
             var_dump("authString=".$authString);
             var_dump("canonicalURI=".$canonicalURI);
             var_dump("canonicalQueryString=".$canonicalQueryString);
@@ -138,7 +126,7 @@ class YopRsaClient
         $YopRequest->httpMethod = "GET";
         $serverUrl = YopRsaClient::richRequest($methodOrUri, $YopRequest);
         $serverUrl .= (strpos($serverUrl,'?') === false ?'?':'&') . $YopRequest->toQueryString();
-        
+
         self::SignRsaParameter($methodOrUri, $YopRequest);
         $response = HttpRequest::curl_request($serverUrl, $YopRequest);
         return $response;
@@ -217,7 +205,6 @@ class YopRsaClient
                 if (($headersToSign == null && isDefaultHeaderToSign($key)) || ($headersToSign != null && in_array(strtolower($key), $headersToSign) && $key != "Authorization")) {
                     $ret[$key] = $value;
                 }
-
             }
         }
         ksort($ret);
@@ -263,14 +250,14 @@ class YopRsaClient
         }
 
         sort($headerStrings);
-        $StrQuery = "";
+        $strQuery = "";
 
         foreach ($headerStrings as $kv) {
-            $StrQuery .= strlen($StrQuery) == 0 ? "" : "\n";
-            $StrQuery .= $kv;
+            $strQuery .= strlen($strQuery) == 0 ? "" : "\n";
+            $strQuery .= $kv;
         }
 
-        return $StrQuery;
+        return $strQuery;
     }
 
     /**
@@ -289,17 +276,15 @@ class YopRsaClient
     {
         $YopRequest->httpMethod = "POST";
         $serverUrl = self::richRequest($methodOrUri, $YopRequest);
-
         self::SignRsaParameter($methodOrUri, $YopRequest);
         $response = HttpRequest::curl_request($serverUrl, $YopRequest);
-        //print_r($response);
         return $response;
     }
 
     static public function richRequest($methodOrUri, $YopRequest)
     {
-        if (strpos($methodOrUri, $YopRequest->config->serverRoot)) {
-            $methodOrUri = substr($methodOrUri, strlen($YopRequest->config->serverRoot) + 1);
+        if (strpos($methodOrUri, YopConfig::$serverRoot)) {
+            $methodOrUri = substr($methodOrUri, strlen(YopConfig::$serverRoot) + 1);
         }
         $serverUrl = $YopRequest->serverRoot;
         $serverUrl .= $methodOrUri;
@@ -320,10 +305,8 @@ class YopRsaClient
         }
 
         $response = new YopResponse();
-
         $jsoncontent = json_decode($content);
         $response->requestId = $YopRequest->requestId;
-
         if(!empty($jsoncontent->result)){
             $response->state = "SUCCESS";
             $response->result = $jsoncontent->result;
@@ -335,11 +318,42 @@ class YopRsaClient
             $response->error->message = $jsoncontent->message;
             $response->error->subCode = $jsoncontent->subCode;
             $response->error->subMessage = $jsoncontent->subMessage;
-
             $response->sign = $jsoncontent->sign;
         }
 
+        print_r($response);
+
+        if(!empty($response->sign)) {
+            $response->validSign = YopRsaClient::isValidRsaResult($jsoncontent->result, $jsoncontent->sign, $YopRequest->yopPublicKey);
+        }else{
+            $response->validSign="1";
+        }
         return $response;
     }
 
+
+    public static function isValidRsaResult($result, $sign, $public_key){
+        $result=json_encode($result,320);
+        $sb = "";
+        if ($result == null || empty($result)) {
+            $sb = "";
+        } else {
+            $sb .= trim($result);
+        }
+
+        $public_key = "-----BEGIN PUBLIC KEY-----\n" .
+            wordwrap($public_key, 64, "\n", true) .
+            "\n-----END PUBLIC KEY-----";
+        $pub_key = openssl_pkey_get_public($public_key);
+        $sb= preg_replace("/[\s]{2,}/","",$sb);
+        $sb= str_replace(PHP_EOL,"",$sb);
+        $sb= str_replace(" ","",$sb);
+        $res = openssl_verify($sb,Base64Url::decode(substr($sign,0,-7)), $pub_key, "SHA256"); //验证
+        openssl_free_key($pub_key);
+        if ($res == 1) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 }

@@ -2,8 +2,6 @@
 require_once("YopConfig.php");
 
 class YopRequest {
-    public $config;
-
     public $httpMethod;
     public $method;
     public $version = "1.0";
@@ -72,42 +70,37 @@ class YopRequest {
         $this->method = $method;
     }
 
-    public function __construct($appKey='', $secretKey=null, $yopPublicKey=null, $serverRoot=null) { //定义构造函数
-        $this->config = new YopConfig();
+    public function __construct($appKey='', $secretKey=null, $serverRoot=null, $yopPublicKey=null) { //定义构造函数
         $this->requestId = YopRequest::uuid();
 
         if(!empty($appKey)){
             $this->appKey = $appKey;
         }
         else{
-            $this->appKey = $this->config->appKey;
+            $this->appKey = YopConfig::$appKey;
         }
+
         if(!empty($secretKey)){
             $this->secretKey = $secretKey;
         }
         else{
-            $this->secretKey = $this->config->getSecret();
+            $this->secretKey = YopConfig::$hmacSecretKey;
         }
 
         if(!empty($yopPublicKey)){
             $this->yopPublicKey = $yopPublicKey;
         }
         else{
-            $this->yopPublicKey = $this->config->getSecret();
+            $this->yopPublicKey = YopConfig::$yopPublicKey;
         }
 
         if(!empty($serverRoot)){
             $this->serverRoot = $serverRoot;
         }
         else{
-            $this->serverRoot = $this->config->serverRoot;
+            $this->serverRoot = YopConfig::$serverRoot;
         }
-        if(!empty($serverRoot)){
-             $this->serverRoot = $yosServerRoot;
-        }
-        else{
-            $this->serverRoot = $this->config->yosServerRoot;
-        }
+
     }
 
     public function addParam($key,$values){
@@ -168,9 +161,7 @@ class YopRequest {
         $uid = uniqid("", true);
         $data = $_SERVER['REQUEST_TIME'];
         $hash = hash('ripemd128', $uid . $data);
-        var_dump($uid);
-        var_dump($data);
-        var_dump($hash);
+
         $guid = $namespace .
                 substr($uid,  0,  14) .
                 substr($uid,  15,  24) .
