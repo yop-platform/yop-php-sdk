@@ -86,7 +86,7 @@ class YopClient{
 
         date_default_timezone_set('PRC');
         $dataTime = new DateTime();
-        $timestamp = $dataTime->format(DateTime::ISO8601); // Works the same since const ISO8601 = "Y-m-d\TH:i:sO"
+        $timestamp = $dataTime->format('Ymd\THis\Z'); // Works the same since const ISO8601 = "Y-m-d\TH:i:sO"
 
         $headers = array();
         $headers['x-yop-appkey'] = $appKey;
