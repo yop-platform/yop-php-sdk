@@ -114,7 +114,7 @@ class YopClient{
     }
 
    static public function handleResult($YopRequest, $content){
-        if ($request->downRequest) {
+        if ($YopRequest->downRequest) {
             return $content;
         }
 
