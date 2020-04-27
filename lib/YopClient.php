@@ -126,7 +126,6 @@ class YopClient{
         if(!empty($jsoncontent->result)){
             $response->state = "SUCCESS";
             $response->result = $jsoncontent->result;
-            $response->sign = $jsoncontent->sign;
         } else {
             $response->state = "FAILURE";
             $response->error = new YopError();
@@ -134,8 +133,6 @@ class YopClient{
             $response->error->message = $jsoncontent->message;
             $response->error->subCode = $jsoncontent->subCode;
             $response->error->subMessage = $jsoncontent->subMessage;
-
-            $response->sign = $jsoncontent->sign;
         }
 
         if (YopConfig::$debug) {
