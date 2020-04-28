@@ -308,7 +308,7 @@ class YopRsaClient
 
     public static function handleRsaResult($YopRequest, $content)
     {
-        if ($YopRequest->downRequest) {
+        if (isset($YopRequest->downRequest) && $YopRequest->downRequest) {
             return $content;
         }
 
