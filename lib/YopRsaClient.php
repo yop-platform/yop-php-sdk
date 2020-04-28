@@ -24,11 +24,11 @@ class YopRsaClient
      */
     public static function SignRsaParameter($methodOrUri, $YopRequest)
     {
-        $appKey =$YopRequest->appKey;
-        if(empty($appKey)){
+        $appKey = $YopRequest->appKey;
+        if (empty($appKey)) {
             $appKey = YopConfig::$appKey;
         }
-        if(empty($appKey)){
+        if (empty($appKey)) {
             error_log("appKey 不能为空");
         }
 
@@ -96,14 +96,14 @@ class YopRsaClient
         $headers['Authorization'] = "YOP-RSA2048-SHA256 " . $protocolVersion . "/" . $appKey . "/" . $timestamp . "/" . $EXPIRED_SECONDS . "/" . $signedHeaders . "/" . $signToBase64;
 
         if (YopConfig::$debug) {
-            var_dump("authString=".$authString);
-            var_dump("canonicalURI=".$canonicalURI);
-            var_dump("canonicalQueryString=".$canonicalQueryString);
-            var_dump("canonicalHeader=".$canonicalHeader);
-            var_dump("canonicalRequest=".$canonicalRequest);
-            var_dump("signToBase64=".$signToBase64);
+            var_dump("authString=" . $authString);
+            var_dump("canonicalURI=" . $canonicalURI);
+            var_dump("canonicalQueryString=" . $canonicalQueryString);
+            var_dump("canonicalHeader=" . $canonicalHeader);
+            var_dump("canonicalRequest=" . $canonicalRequest);
+            var_dump("signToBase64=" . $signToBase64);
         }
-        $YopRequest->headers=$headers;
+        $YopRequest->headers = $headers;
     }
 
     public function __set($name, $value)
@@ -116,16 +116,18 @@ class YopRsaClient
         return $this->$name;
     }
 
-    public static function get($methodOrUri, $YopRequest){
+    public static function get($methodOrUri, $YopRequest)
+    {
         $content = YopRsaClient::getForString($methodOrUri, $YopRequest);
         $response = YopRsaClient::handleRsaResult($YopRequest, $content);
         return $response;
     }
 
-    public static function getForString($methodOrUri, $YopRequest){
+    public static function getForString($methodOrUri, $YopRequest)
+    {
         $YopRequest->httpMethod = "GET";
         $serverUrl = YopRsaClient::richRequest($methodOrUri, $YopRequest);
-        $serverUrl .= (strpos($serverUrl,'?') === false ?'?':'&') . $YopRequest->toQueryString();
+        $serverUrl .= (strpos($serverUrl, '?') === false ? '?' : '&') . $YopRequest->toQueryString();
 
         self::SignRsaParameter($methodOrUri, $YopRequest);
         $response = HttpRequest::curl_request($serverUrl, $YopRequest);
@@ -135,7 +137,7 @@ class YopRsaClient
     public static function post($methodOrUri, $YopRequest)
     {
         $content = YopRsaClient::postString($methodOrUri, $YopRequest);
-        $response = YopRsaClient::handleRsaResult($YopRequest, $content);
+        $response = (new YopRsaClient)->handleRsaResult($YopRequest, $content);
         return $response;
     }
 
@@ -281,12 +283,17 @@ class YopRsaClient
         return $response;
     }
 
-    static public function richRequest($methodOrUri, $YopRequest)
+    public static function richRequest($methodOrUri, $YopRequest)
     {
         if (strpos($methodOrUri, YopConfig::$serverRoot)) {
             $methodOrUri = substr($methodOrUri, strlen(YopConfig::$serverRoot) + 1);
         }
         $serverUrl = $YopRequest->serverRoot;
+        //判定是否是yos请求，当前只判断是否是文件上传，后续需要补充判断文件下载
+        $yosRequest = !empty($YopRequest->fileMap);
+        if ($yosRequest && strcmp($serverUrl, YopConfig::$serverRoot) === 0) {
+            $serverUrl = YopConfig::$yosServerRoot;
+        }
         $serverUrl .= $methodOrUri;
         preg_match('@/rest/v([^/]+)/@i', $methodOrUri, $version);
         if (!empty($version)) {
@@ -299,18 +306,18 @@ class YopRsaClient
         return $serverUrl;
     }
 
-    public function handleRsaResult($YopRequest, $content){
-        if ($request->downRequest) {
+    public static function handleRsaResult($YopRequest, $content)
+    {
+        if (isset($YopRequest->downRequest) && $YopRequest->downRequest) {
             return $content;
         }
 
         $response = new YopResponse();
         $jsoncontent = json_decode($content);
         $response->requestId = $YopRequest->requestId;
-        if(!empty($jsoncontent->result)){
+        if (!empty($jsoncontent->result)) {
             $response->state = "SUCCESS";
             $response->result = $jsoncontent->result;
-            $response->sign = $jsoncontent->sign;
         } else {
             $response->state = "FAILURE";
             $response->error = new YopError();
@@ -318,42 +325,43 @@ class YopRsaClient
             $response->error->message = $jsoncontent->message;
             $response->error->subCode = $jsoncontent->subCode;
             $response->error->subMessage = $jsoncontent->subMessage;
-            $response->sign = $jsoncontent->sign;
         }
 
         print_r($response);
 
-        if(!empty($response->sign)) {
-            $response->validSign = YopRsaClient::isValidRsaResult($jsoncontent->result, $jsoncontent->sign, $YopRequest->yopPublicKey);
-        }else{
-            $response->validSign="1";
-        }
+//        if (!empty($response->sign)) {
+//            $response->validSign = YopRsaClient::isValidRsaResult($jsoncontent->result, $jsoncontent->sign, $YopRequest->yopPublicKey);
+//        } else {
+        //3.2.7之前返回结果没有签名，3.2.7之后有签名，具体签名策略请参照网关
+        $response->validSign = "1";
+//        }
         return $response;
     }
 
 
-    public static function isValidRsaResult($result, $sign, $public_key){
-        $result=json_encode($result,320);
-        $sb = "";
-        if ($result == null || empty($result)) {
-            $sb = "";
-        } else {
-            $sb .= trim($result);
-        }
-
-        $public_key = "-----BEGIN PUBLIC KEY-----\n" .
-            wordwrap($public_key, 64, "\n", true) .
-            "\n-----END PUBLIC KEY-----";
-        $pub_key = openssl_pkey_get_public($public_key);
-        $sb= preg_replace("/[\s]{2,}/","",$sb);
-        $sb= str_replace(PHP_EOL,"",$sb);
-        $sb= str_replace(" ","",$sb);
-        $res = openssl_verify($sb,Base64Url::decode(substr($sign,0,-7)), $pub_key, "SHA256"); //验证
-        openssl_free_key($pub_key);
-        if ($res == 1) {
-            return true;
-        } else {
-            return false;
-        }
-    }
+//    public static function isValidRsaResult($result, $sign, $public_key)
+//    {
+//        $result = json_encode($result, 320);
+//        $sb = "";
+//        if ($result == null || empty($result)) {
+//            $sb = "";
+//        } else {
+//            $sb .= trim($result);
+//        }
+//
+//        $public_key = "-----BEGIN PUBLIC KEY-----\n" .
+//            wordwrap($public_key, 64, "\n", true) .
+//            "\n-----END PUBLIC KEY-----";
+//        $pub_key = openssl_pkey_get_public($public_key);
+//        $sb = preg_replace("/[\s]{2,}/", "", $sb);
+//        $sb = str_replace(PHP_EOL, "", $sb);
+//        $sb = str_replace(" ", "", $sb);
+//        $res = openssl_verify($sb, Base64Url::decode(substr($sign, 0, -7)), $pub_key, "SHA256"); //验证
+//        openssl_free_key($pub_key);
+//        if ($res == 1) {
+//            return true;
+//        } else {
+//            return false;
+//        }
+//}
 }
