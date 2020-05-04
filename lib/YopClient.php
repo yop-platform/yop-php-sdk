@@ -95,9 +95,7 @@ class YopClient
         $toSignParamMap = array_merge($YopRequest->paramMap, array("v" => $YopRequest->version, "method" => $YopRequest->method));
         $signValue = YopSignUtils::sign($toSignParamMap, $YopRequest->ignoreSignParams, $YopRequest->secretKey, $YopRequest->signAlg);
 
-        date_default_timezone_set('PRC');
-        $dataTime = new DateTime();
-        $timestamp = $dataTime->format('Ymd\THis\Z'); // Works the same since const ISO8601 = "Y-m-d\TH:i:sO"
+        $timestamp = gmdate('Y-m-d\TH:i:s\Z',time());
 
         $headers = array();
         $headers['x-yop-appkey'] = $appKey;

@@ -32,10 +32,7 @@ class YopRsaClient
             error_log("appKey 不能为空");
         }
 
-        date_default_timezone_set('PRC');
-        $dataTime = new DateTime();
-        $timestamp = $dataTime->format("Ymd\THis\Z"); // Works the same since const ISO8601 = "Y-m-d\TH:i:sO"
-
+        $timestamp = gmdate('Y-m-d\TH:i:s\Z', time());;
         $headers = array();
 
         $headers['x-yop-appkey'] = $appKey;
