@@ -1,3 +1,5 @@
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fyop-platform%2Fyop-php-sdk.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fyop-platform%2Fyop-php-sdk?ref=badge_shield)
+
 ###########环境依赖
 php v5.5+
 安装php的mcrypt扩展 openssl
@@ -79,3 +81,7 @@ encrypt=jqIh5ikW6033NV6jQ9o5XJaOJ5czDmd2MiOUkTtoBeyOaI7lglVF58bh1LEuRqoxMpWKooEU
   "sign" : "ab7f48bcc3b91d06b1108ac3458caac460c3f3d4918202e04b59ea13d3127035"
 }
 ```
+
+
+## License
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fyop-platform%2Fyop-php-sdk.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fyop-platform%2Fyop-php-sdk?ref=badge_large)
