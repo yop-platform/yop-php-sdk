@@ -19,8 +19,6 @@ class YopRsaClient
     /**
      * @param $methodOrUri
      * @param $YopRequest
-     * @param $encode_data
-     * @return array
      */
     public static function SignRsaParameter($methodOrUri, $YopRequest)
     {
