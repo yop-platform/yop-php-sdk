@@ -1,13 +1,6 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: yp-tc-7176
- * Date: 17/7/16
- * Time: 20:28
- */
 
-require_once("StringBuilder.php");
-
+namespace Yeepay\Yop\Sdk\V1\Util;
 
 abstract class HttpUtils
 {
@@ -26,13 +19,13 @@ abstract class HttpUtils
      * client will replace "//" in the path with a single '/', which makes the object key incorrect. Thus we replace
      * "//" with "/%2F" here.
      *
-     * @param path the path string to normalize.
-     * @return the normalized path string.
+     * @param $path string the path string to normalize.
+     * @return string the normalized path string.
      * @see #normalize(String)
      */
-    public static function normalizePath($path)
+    public static function normalizePath($path): string
     {
-        return str_replace("%2F", "/",HttpUtils::normalize($path));
+        return str_replace("%2F", "/", HttpUtils::normalize($path));
     }
 
     /**
@@ -44,12 +37,14 @@ abstract class HttpUtils
         return rawurlencode($value);
     }
 
-    public static function startsWith($haystack, $needle) {
+    public static function startsWith($haystack, $needle)
+    {
         // search backwards starting from haystack length characters from the end
         return $needle === "" || strrpos($haystack, $needle, -strlen($haystack)) !== FALSE;
     }
 
-    public static function endsWith($haystack, $needle) {
+    public static function endsWith($haystack, $needle)
+    {
         // search forward starting from end minus needle length characters
         return $needle === "" || (($temp = strlen($haystack) - strlen($needle)) >= 0 && strpos($haystack, $needle, $temp) !== FALSE);
     }
@@ -62,10 +57,10 @@ abstract class HttpUtils
     {
         if ($path == null) {
             return "/";
-        } else if (HttpUtils::startsWith($path,'/')) {
+        } else if (HttpUtils::startsWith($path, '/')) {
             return HttpUtils::normalizePath($path);
         } else {
-            return "/" + HttpUtils::normalizePath($path);
+            return "/" . HttpUtils::normalizePath($path);
         }
     }
 
