@@ -1,12 +1,10 @@
 <?php
 
-require_once("YopRequest.php");
-require_once("YopResponse.php");
-require_once("YopError.php");
-require_once("Util/HttpRequest.php");
-require_once("Util/StringUtils.php");
-require_once("Util/HttpUtils.php");
-require_once("Util/Base64Url.php");
+namespace Yeepay\Yop\Sdk\V1;
+
+use Yeepay\Yop\Sdk\V1\Util\Base64Url;
+use Yeepay\Yop\Sdk\V1\Util\HTTPRequest;
+use Yeepay\Yop\Sdk\V1\Util\HttpUtils;
 
 class YopRsaClient
 {
@@ -18,7 +16,7 @@ class YopRsaClient
 
     /**
      * @param $methodOrUri
-     * @param $YopRequest
+     * @param $YopRequest YopRequest
      */
     public static function SignRsaParameter($methodOrUri, $YopRequest)
     {
@@ -139,7 +137,7 @@ class YopRsaClient
     /**
      * @param $methodOrUri
      * @param $YopRequest
-     * @return type
+     * @return bool|string
      */
     public static function postString($methodOrUri, $YopRequest)
     {
@@ -183,7 +181,7 @@ class YopRsaClient
     /**
      * @param $headers
      * @param $headersToSign
-     * @return arry
+     * @return array
      */
     public static function getHeadersToSign($headers, $headersToSign)
     {
@@ -199,7 +197,7 @@ class YopRsaClient
 
         foreach ($headers as $key => $value) {
             if ($value != null && !empty($value)) {
-                if (($headersToSign == null && isDefaultHeaderToSign($key)) || ($headersToSign != null && in_array(strtolower($key), $headersToSign) && $key != "Authorization")) {
+                if (($headersToSign == null && YopRsaClient::isDefaultHeaderToSign($key)) || ($headersToSign != null && in_array(strtolower($key), $headersToSign) && $key != "Authorization")) {
                     $ret[$key] = $value;
                 }
             }
@@ -212,21 +210,21 @@ class YopRsaClient
      * @param $header
      * @return bool
      */
-    public static function isDefaultHeaderToSign($header)
+    public static function isDefaultHeaderToSign($header): bool
     {
         $header = strtolower(trim($header));
         $defaultHeadersToSign = array();
         array_push($defaultHeadersToSign, "host");
         array_push($defaultHeadersToSign, "content-type");
 
-        return strpos($header, "x-yop-") == 0 || in_array($defaultHeadersToSign, $header);
+        return strpos($header, "x-yop-") == 0 || in_array($header, $defaultHeadersToSign);
     }
 
     /**
      * @param $headers
      * @return string
      */
-    public static function getCanonicalHeaders($headers)
+    public static function getCanonicalHeaders($headers): string
     {
         if (empty($headers)) {
             return "";
@@ -262,7 +260,7 @@ class YopRsaClient
      * @param $YopRequest
      * @return YopResponse
      */
-    public static function upload($methodOrUri, $YopRequest)
+    public static function upload($methodOrUri, $YopRequest): YopResponse
     {
         $content = self::uploadForString($methodOrUri, $YopRequest);
         $response = self::handleRsaResult($YopRequest, $content);
@@ -278,7 +276,7 @@ class YopRsaClient
         return $response;
     }
 
-    public static function richRequest($methodOrUri, $YopRequest)
+    public static function richRequest($methodOrUri, $YopRequest): string
     {
         if (strpos($methodOrUri, YopConfig::$serverRoot)) {
             $methodOrUri = substr($methodOrUri, strlen(YopConfig::$serverRoot) + 1);

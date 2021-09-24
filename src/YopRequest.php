@@ -1,7 +1,9 @@
 <?php
-require_once("YopConfig.php");
 
-class YopRequest {
+namespace Yeepay\Yop\Sdk\V1;
+
+class YopRequest
+{
     public $httpMethod;
     public $method;
     public $version = "1.0";
@@ -50,96 +52,106 @@ class YopRequest {
      */
     public $serverRoot;
 
-    public function __set($name, $value){
+    public function __set($name, $value)
+    {
         $this->$name = $value;
 
     }
-    public function __get($name){
+
+    public function __get($name)
+    {
         return $this->$name;
     }
 
-    public function setSignAlg($signAlg) {
+    public function setSignAlg($signAlg)
+    {
         $this->signAlg = $signAlg;
     }
 
-    public function setVersion($version) {
+    public function setVersion($version)
+    {
         $this->version = $version;
     }
 
-    public function setMethod($method) {
+    public function setMethod($method)
+    {
         $this->method = $method;
     }
 
-    public function __construct($appKey='', $secretKey=null, $serverRoot=null, $yopPublicKey=null) { //定义构造函数
+    public function __construct($appKey = '', $secretKey = null, $serverRoot = null, $yopPublicKey = null)
+    { //定义构造函数
         $this->requestId = YopRequest::uuid();
 
-        if(!empty($appKey)){
+        if (!empty($appKey)) {
             $this->appKey = $appKey;
-        }
-        else{
+        } else {
             $this->appKey = YopConfig::$appKey;
         }
 
-        if(!empty($secretKey)){
+        if (!empty($secretKey)) {
             $this->secretKey = $secretKey;
-        }
-        else{
+        } else {
             $this->secretKey = YopConfig::$hmacSecretKey;
         }
 
-        if(!empty($yopPublicKey)){
+        if (!empty($yopPublicKey)) {
             $this->yopPublicKey = $yopPublicKey;
-        }
-        else{
+        } else {
             $this->yopPublicKey = YopConfig::$yopPublicKey;
         }
 
-        if(!empty($serverRoot)){
+        if (!empty($serverRoot)) {
             $this->serverRoot = $serverRoot;
-        }
-        else{
+        } else {
             $this->serverRoot = YopConfig::$serverRoot;
         }
 
     }
 
-    public function addParam($key,$values){
-        if ("_file"==$key) {
-            YopRequest::addFile($key,$values);
+    public function addParam($key, $values)
+    {
+        if ("_file" == $key) {
+            YopRequest::addFile($key, $values);
         } else {
-            $addParam = array($key=>$values);
-            $this->paramMap = array_merge($this->paramMap,$addParam);
+            $addParam = array($key => $values);
+            $this->paramMap = array_merge($this->paramMap, $addParam);
         }
     }
 
-    public function addFile($key,$values){
-        $this->ignoreSignParams = array_push($this->ignoreSignParams,$key);
-        $addFile = array($key=>$values);
-        $this->fileMap = array_merge($this->fileMap,$addFile);
+    public function addFile($key, $values)
+    {
+        $this->ignoreSignParams = array_push($this->ignoreSignParams, $key);
+        $addFile = array($key => $values);
+        $this->fileMap = array_merge($this->fileMap, $addFile);
     }
 
-    public function removeParam($key){
-        foreach ($this->paramMap as $k => $v){
-            if($key == $k){
+    public function removeParam($key)
+    {
+        foreach ($this->paramMap as $k => $v) {
+            if ($key == $k) {
                 unset($this->paramMap[$k]);
             }
         }
     }
 
-    public function getParam($key){
+    public function getParam($key)
+    {
         return $this->paramMap[$key];
     }
 
-    public function setJsonParam($jsonParam){
+    public function setJsonParam($jsonParam)
+    {
         $this->jsonParam = $jsonParam;
     }
 
-    public function getJsonParam(){
+    public function getJsonParam()
+    {
         return $this->jsonParam;
     }
 
-    public function encoding(){
-        foreach ($this->paramMap as $k=>$v){
+    public function encoding()
+    {
+        foreach ($this->paramMap as $k => $v) {
             $this->paramMap[$k] = urlencode($v);
         }
     }
@@ -147,26 +159,28 @@ class YopRequest {
     /**
      * 将参数转换成k=v拼接的形式
      */
-    public function toQueryString(){
-        $StrQuery="";
-        foreach ($this->paramMap as $k=>$v){
+    public function toQueryString()
+    {
+        $StrQuery = "";
+        foreach ($this->paramMap as $k => $v) {
             $StrQuery .= strlen($StrQuery) == 0 ? "" : "&";
-            $StrQuery.=$k."=".urlencode($v);
+            $StrQuery .= $k . "=" . urlencode($v);
         }
         return $StrQuery;
     }
 
-    private function uuid($namespace = '') {
+    private function uuid($namespace = '')
+    {
         static $guid = '';
         $uid = uniqid("", true);
         $data = $_SERVER['REQUEST_TIME'];
         $hash = hash('ripemd128', $uid . $data);
 
         $guid = $namespace .
-                substr($uid,  0,  14) .
-                substr($uid,  15,  24) .
-                substr($hash, 0,  10) .
-                '';
+            substr($uid, 0, 14) .
+            substr($uid, 15, 24) .
+            substr($hash, 0, 10) .
+            '';
         return $guid;
     }
 

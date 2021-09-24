@@ -1,10 +1,9 @@
 <?php
 
-require_once("YopRequest.php");
-require_once("YopResponse.php");
-require_once("YopError.php");
-require_once("Util/YopSignUtils.php");
-require_once("Util/HttpRequest.php");
+namespace Yeepay\Yop\Sdk\V1;
+
+use Yeepay\Yop\Sdk\V1\Util\HTTPRequest;
+use Yeepay\Yop\Sdk\V1\Util\YopSignUtils;
 
 class YopClient
 {
@@ -95,7 +94,7 @@ class YopClient
         $toSignParamMap = array_merge($YopRequest->paramMap, array("v" => $YopRequest->version, "method" => $YopRequest->method));
         $signValue = YopSignUtils::sign($toSignParamMap, $YopRequest->ignoreSignParams, $YopRequest->secretKey, $YopRequest->signAlg);
 
-        $timestamp = gmdate('Y-m-d\TH:i:s\Z',time());
+        $timestamp = gmdate('Y-m-d\TH:i:s\Z', time());
 
         $headers = array();
         $headers['x-yop-appkey'] = $appKey;

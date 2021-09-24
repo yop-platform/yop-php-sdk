@@ -1,10 +1,12 @@
 <?php
 
-require_once("HttpUtils.php");
+namespace Yeepay\Yop\Sdk\V1\Util;
+
+use Yeepay\Yop\Sdk\V1\YopConfig;
 
 define("LANGS", "php");
-define("VERSION", "3.1.9");
-define("USERAGENT", LANGS . "/" . VERSION . "/" . PHP_OS . "/" . $_SERVER ['SERVER_SOFTWARE'] . "/Zend Framework/" . zend_version() . "/" . PHP_VERSION . "/" . $_SERVER['HTTP_ACCEPT_LANGUAGE'] . "/");
+define("VERSION", "3.1.11");
+define("USERAGENT", LANGS . "/" . VERSION . "/" . PHP_OS . "/Zend Framework/" . zend_version() . "/" . PHP_VERSION);
 
 abstract class HTTPRequest
 {
@@ -15,7 +17,7 @@ abstract class HTTPRequest
      * @param string $key 密钥
      * @param string $CIPHER 算法
      * @param string $MODE 模式
-     * @return type
+     * @return bool|string
      */
     static public function curl_request($url, $request)
     {
@@ -28,7 +30,7 @@ abstract class HTTPRequest
         curl_setopt($curl, CURLOPT_TIMEOUT, $request->readTimeout);
         curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, $request->connectTimeout);
 
-        $TLS = substr($url, 0, 8) == "https://" ? true : false;
+        $TLS = substr($url, 0, 8) == "https://";
         if ($TLS) {
             curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, true);
             curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, 2);
@@ -74,7 +76,7 @@ abstract class HTTPRequest
                         if (class_exists('CURLFile')) {
                             // 禁用"@"上传方法,这样就可以安全的传输"@"开头的参数值
                             curl_setopt($curl, CURLOPT_SAFE_UPLOAD, true);
-                            $file = new CURLFile($fileName);
+                            $file = new \CURLFile($fileName);
                         } else {
                             curl_setopt($curl, CURLOPT_SAFE_UPLOAD, false);
                             $file = "@{$fileName}";
@@ -95,7 +97,8 @@ abstract class HTTPRequest
         $data = curl_exec($curl);
         //var_dump($data);
 
-        if (curl_errno($curl)) {
+        if (curl_errno($curl) || (is_bool($data) && !$data)) {
+            var_dump('curl fail errno:', curl_errno($curl), ", errinfo:", curl_error($curl));
             return curl_error($curl);
         }
 
