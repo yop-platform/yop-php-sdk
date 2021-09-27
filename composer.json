@@ -1,7 +1,6 @@
 {
   "name": "yeepay/yop-php-sdk",
   "type": "library",
-  "version": "3.1.11",
   "description": "本项目用于对接 YOP 上面的 API",
   "homepage": "https://open.yeepay.com",
   "license": "Apache-2.0",
