@@ -21,7 +21,7 @@ class RsaTest extends TestCase {
 
         //加入请求参数
         $request->addParam("request_flow_id", "12345678");//请求流水标识
-        $request->addParam("name", "张文康");//请求流水标识
+        $request->addParam("name", "xxx");//请求流水标识
         $request->addParam("id_card_number", "370982199101186691");//请求流水标识
 
         //提交Post请求
@@ -77,8 +77,8 @@ class RsaTest extends TestCase {
 
         //加入请求参数
         $request->addParam("request_flow_id", "12345678");//请求流水标识
-        $request->addParam("name", "张文康");//请求流水标识
-        $request->addParam("id_card_number", "370982199101186691");//请求流水标识
+        $request->addParam("name", "xxx");//请求流水标识
+        $request->addParam("id_card_number", "xxx");//请求流水标识
 
         //提交Post请求
         $response = YopRsaClient::get("/rest/v3.0/auth/idcard", $request);
@@ -96,7 +96,7 @@ class RsaTest extends TestCase {
         $request = new YopRequest("app_100800095600031", $private_key);
 
         //加入请求参数
-        $request->addParam("strParam", "张文康");
+        $request->addParam("strParam", "xxx");
 
         //提交Post请求
         $response = YopRsaClient::get("/rest/v1.0/test-wdc/test-param-parse/input-stream-result", $request);
