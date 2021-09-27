@@ -20,8 +20,8 @@ class AesTest extends TestCase {
 
         //加入请求参数
         $request->addParam("request_flow_id", "12345678");//请求流水标识
-        $request->addParam("name", "张文康");//请求流水标识
-        $request->addParam("id_card_number", "370982199101186691");//请求流水标识
+        $request->addParam("name", "xxx");//请求流水标识
+        $request->addParam("id_card_number", "xxx");//请求流水标识
 
         //提交Get请求
         $response = YopClient::get("/rest/v3.0/auth/idcard", $request);
@@ -39,7 +39,7 @@ class AesTest extends TestCase {
 
         //加入请求参数
         $request->addParam("request_flow_id", "12345678");//请求流水标识
-        $request->addParam("name", "张文康");//请求流水标识
+        $request->addParam("name", "xxx");//请求流水标识
         $request->addParam("id_card_number", "370982199101186691");//请求流水标识
 
         //提交Post请求
