@@ -6,7 +6,7 @@ use Yeepay\Yop\Sdk\V1\YopConfig;
 
 define("LANGS", "php");
 define("VERSION", "3.1.11");
-define("USERAGENT", LANGS . "/" . VERSION . "/" . PHP_OS . "/Zend Framework/" . zend_version() . "/" . PHP_VERSION);
+define("USERAGENT", LANGS . "/" . VERSION . "/" . PHP_OS . "/" . (array_key_exists('SERVER_SOFTWARE', $_SERVER) ? $_SERVER ['SERVER_SOFTWARE'] : "") . "/Zend Framework/" . zend_version() . "/" . PHP_VERSION . "/" . (array_key_exists('HTTP_ACCEPT_LANGUAGE', $_SERVER) ? $_SERVER['HTTP_ACCEPT_LANGUAGE'] : "") . "/");
 
 abstract class HTTPRequest
 {
