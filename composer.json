@@ -1,0 +1,36 @@
+{
+  "name": "yeepay/yop-php-sdk",
+  "type": "library",
+  "description": "本项目用于对接 YOP 上面的 API",
+  "homepage": "https://open.yeepay.com",
+  "license": "Apache-2.0",
+  "keywords": [
+    "yop",
+    "openapi"
+  ],
+  "authors": [
+    {
+      "name": "Yop",
+      "email": "yop@yeepay.com"
+    }
+  ],
+  "require": {
+    "php": ">=5.5",
+    "ext-openssl": "*",
+    "ext-curl": "*",
+    "ext-json": "*"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^4.8"
+  },
+  "autoload": {
+    "psr-4": {
+      "Yeepay\\Yop\\Sdk\\V1\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Yeepay\\Yop\\Sdk\\V1\\Test\\": "test/"
+    }
+  }
+}

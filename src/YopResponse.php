@@ -1,6 +1,9 @@
 <?php
 
-class YopResponse{
+namespace Yeepay\Yop\Sdk\V1;
+
+class YopResponse
+{
     /**
      * 状态(SUCCESS/FAILURE)
      */
@@ -25,11 +28,13 @@ class YopResponse{
 
     public $requestId;
 
-    public function __set($name, $value){
+    public function __set($name, $value)
+    {
         $this->$name = $value;
     }
 
-    public function __get($name){
+    public function __get($name)
+    {
         return $this->$name;
     }
 
