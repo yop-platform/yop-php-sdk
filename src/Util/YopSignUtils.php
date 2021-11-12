@@ -85,6 +85,13 @@ abstract class YopSignUtils
 
     }
 
+    /**
+     * 解密数字信封
+     * @param $source 待解密内容
+     * @param $private_Key 商户私钥（用于解密）
+     * @param $public_Key 易宝公钥(用于签名)
+     * @return string 已解密内容
+     */
     public static function decrypt($source, $private_Key, $public_Key)
     {
         $private_key = "-----BEGIN RSA PRIVATE KEY-----\n" .
