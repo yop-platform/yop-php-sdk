@@ -51,6 +51,9 @@ abstract class HTTPRequest
             array_push($headerArray, 'Content-Type: application/json; charset=utf-8',
                 'Content-Length: ' . strlen($request->jsonParam));
         }
+        if (!$request->fileMap) {
+            array_push($headerArray, 'Content-Type: application/x-www-form-urlencoded');
+        }
         curl_setopt($curl, CURLOPT_HTTPHEADER, $headerArray);
 
         //var_dump($headerArray);
@@ -65,6 +68,7 @@ abstract class HTTPRequest
             } else {
                 $fields = $request->paramMap;
                 if ($request->fileMap) {
+                    // form-data
                     foreach ($request->fileMap as $fileParam => $fileName) {
                         //$file_name = str_replace("%2F", "/",$post["_file"]);
                         //var_dump($fileParam);
@@ -86,6 +90,9 @@ abstract class HTTPRequest
                     }
                     curl_setopt($curl, CURLOPT_INFILESIZE, YopConfig::$maxUploadLimit);
                     //curl_setopt($curl, CURLOPT_BUFFERSIZE, 16kB);
+                } else {
+                    // x-www-form-urlencoded
+                    $fields = http_build_query($fields);
                 }
                 curl_setopt($curl, CURLOPT_POSTFIELDS, $fields);
             }
