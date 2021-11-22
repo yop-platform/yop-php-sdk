@@ -1,14 +1,17 @@
-##3.1.12
-[fix]商户通知解密工具类
-[feat]支持简单form请求
+## 3.1.10
 
-##3.1.9
+[fix]非文件传输的post请求，用 application/x-www-form-urlencoded
+
+## 3.1.9
+
 [fix]请求时间格式化为ALTERNATE ISO8601(UTC)
 
-##3.1.7
+## 3.1.7
+
 [fix]配置读取修复
 
 ## 3.1.5
+
 [fix]对称加密日期格式化
 
 ## 3.1.3
