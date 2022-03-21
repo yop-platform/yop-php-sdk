@@ -1,3 +1,6 @@
+##3.1.13
+[fix]HttpRequest类名
+
 ##3.1.12
 [fix]商户通知解密工具类
 [feat]支持简单form请求

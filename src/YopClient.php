@@ -2,7 +2,7 @@
 
 namespace Yeepay\Yop\Sdk\V1;
 
-use Yeepay\Yop\Sdk\V1\Util\HTTPRequest;
+use Yeepay\Yop\Sdk\V1\Util\HttpRequest;
 use Yeepay\Yop\Sdk\V1\Util\YopSignUtils;
 
 class YopClient

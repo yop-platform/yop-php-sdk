@@ -3,7 +3,7 @@
 namespace Yeepay\Yop\Sdk\V1;
 
 use Yeepay\Yop\Sdk\V1\Util\Base64Url;
-use Yeepay\Yop\Sdk\V1\Util\HTTPRequest;
+use Yeepay\Yop\Sdk\V1\Util\HttpRequest;
 use Yeepay\Yop\Sdk\V1\Util\HttpUtils;
 
 class YopRsaClient
