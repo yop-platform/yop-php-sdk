@@ -29,7 +29,7 @@ abstract class YopSignUtils
      *
      * @return string 返回参数签名值
      */
-    static function sign($params, $ignoreParamNames = '', $secret, $algName = 'sha256'): string
+    static function sign($params, $ignoreParamNames = '', $secret = '', $algName = 'sha256'): string
     {
         $str = '';  //待签名字符串
         //先将参数以其参数名的字典序升序进行排序
