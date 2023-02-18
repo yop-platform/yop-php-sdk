@@ -2,6 +2,7 @@
 
 namespace Yeepay\Yop\Sdk\V1;
 
+#[\AllowDynamicProperties]
 class YopResponse
 {
     /**

@@ -29,7 +29,7 @@ abstract class YopSignUtils
      *
      * @return string 返回参数签名值
      */
-    static function sign($params, $ignoreParamNames = '', $secret, $algName = 'sha256'): string
+    static function sign($params, $ignoreParamNames = '', $secret = '', $algName = 'sha256'): string
     {
         $str = '';  //待签名字符串
         //先将参数以其参数名的字典序升序进行排序
@@ -120,7 +120,9 @@ abstract class YopSignUtils
         //用私钥对随机密钥进行解密
         openssl_private_decrypt(Base64Url::decode($encryptedRandomKeyToBase64), $randomKey, $privateKey);
 
-        openssl_free_key($privateKey);
+        if (PHP_VERSION_ID < 80000) {
+            openssl_free_key($privateKey);
+        }
 
         $encryptedData = openssl_decrypt(Base64Url::decode($encryptedDataToBase64), "AES-128-ECB", $randomKey, OPENSSL_RAW_DATA);
 
@@ -136,7 +138,9 @@ abstract class YopSignUtils
 
         $res = openssl_verify($sourceData, Base64Url::decode($signToBase64), $publicKey, $digestAlg); //验证
 
-        openssl_free_key($publicKey);
+        if (PHP_VERSION_ID < 80000) {
+          openssl_free_key($publicKey);
+        }
 
         //输出验证结果，1：验证成功，0：验证失败
         if ($res == 1) {
@@ -162,7 +166,9 @@ abstract class YopSignUtils
 
         openssl_sign($source, $encode_data, $privateKey, "SHA256");
 
-        openssl_free_key($privateKey);
+        if (PHP_VERSION_ID < 80000) {
+          openssl_free_key($privateKey);
+        }
 
         $signToBase64 = Base64Url::encode($encode_data);
 
