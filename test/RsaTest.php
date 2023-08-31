@@ -2,6 +2,7 @@
 namespace Yeepay\Yop\Sdk\V1\Test;
 
 use PHPUnit\Framework\TestCase;
+use Yeepay\Yop\Sdk\V1\Util\FileUtils;
 use Yeepay\Yop\Sdk\V1\YopConfig;
 use Yeepay\Yop\Sdk\V1\YopRequest;
 use Yeepay\Yop\Sdk\V1\YopRsaClient;
@@ -122,5 +123,8 @@ class RsaTest extends TestCase {
 
         //提交Post请求
         $response = YopRsaClient::get("/rest/v1.0/test-wdc/test-param-parse/input-stream-result", $request);
+
+        FileUtils::saveFile($response);
     }
+
 }
