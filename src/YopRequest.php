@@ -164,7 +164,7 @@ class YopRequest
         $StrQuery = "";
         foreach ($this->paramMap as $k => $v) {
             $StrQuery .= strlen($StrQuery) == 0 ? "" : "&";
-            $StrQuery .= $k . "=" . urlencode($v);
+            $StrQuery .= $k . "=" . urlencode(urlencode($v));
         }
         return $StrQuery;
     }
