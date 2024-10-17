@@ -34,19 +34,34 @@ class YopRsaClient
         $headers['x-yop-appkey'] = $appKey;
         $headers['x-yop-request-id'] = $YopRequest->requestId;
 
-        $protocolVersion = "yop-auth-v2";
+        $protocolVersion = "yop-auth-v3";
         $EXPIRED_SECONDS = "1800";
 
         $authString = $protocolVersion . "/" . $appKey . "/" . $timestamp . "/" . $EXPIRED_SECONDS;
 
         $headersToSignSet = array();
         array_push($headersToSignSet, "x-yop-request-id");
+        array_push($headersToSignSet, "x-yop-content-sha256");
 
         // Formatting the URL with signing protocol.
         $canonicalURI = HttpUtils::getCanonicalURIPath($methodOrUri);
 
         // Formatting the query string with signing protocol.
         $canonicalQueryString = YopRsaClient::getCanonicalQueryString($YopRequest, true);
+
+        // Calculating the content sha256 with signing protocol.
+        $useQueryStringAsPayload = false;
+        $contentStr = "";
+        if ($YopRequest->httpMethod === "POST") {
+            // json
+            if (isset($YopRequest->jsonParam)) {
+                $contentStr = $YopRequest->jsonParam;
+            } elseif (!empty($YopRequest->paramMap)) {
+                $contentStr = $canonicalQueryString;
+                $useQueryStringAsPayload = true;
+            }
+        }
+        $headers['x-yop-content-sha256'] = hash('sha256', $contentStr);
 
         // Sorted the headers should be signed from the request.
         $headersToSign = YopRsaClient::getHeadersToSign($headers, $headersToSignSet);
@@ -63,7 +78,8 @@ class YopRsaClient
             $signedHeaders = strtolower($signedHeaders);
         }
 
-        $canonicalRequest = $authString . "\n" . $YopRequest->httpMethod . "\n" . $canonicalURI . "\n" . $canonicalQueryString . "\n" . $canonicalHeader;
+        $canonicalRequest = $authString . "\n" . $YopRequest->httpMethod . "\n" . $canonicalURI . "\n" .
+            ($useQueryStringAsPayload ? "" : $canonicalQueryString) . "\n" . $canonicalHeader;
 
         // Signing the canonical request using key with sha-256 algorithm.
 
@@ -156,10 +172,6 @@ class YopRsaClient
      */
     public static function getCanonicalQueryString($YopRequest, $forSignature)
     {
-        if (!empty($YopRequest->jsonParam)) {
-            return "";
-        }
-
         $ArrayList = array();
         $StrQuery = "";
         foreach ($YopRequest->paramMap as $k => $v) {
