@@ -21,7 +21,7 @@ abstract class FileUtils {
             stream_copy_to_stream($response, $tmpFile);
             fclose($response);
         } else {
-            throw new \Exception("invalid response" . $response);
+            throw new \Exception("invalid response" . json_encode($response));
         }
         fflush($tmpFile);
         if (YopConfig::$debug) {

@@ -308,7 +308,8 @@ class YopRsaClient
         $response = new YopResponse();
         $jsoncontent = json_decode($content);
         $response->requestId = $YopRequest->requestId;
-        if (!empty($jsoncontent->result)) {
+
+        if (isset($jsoncontent->result)) {
             $response->state = "SUCCESS";
             $response->result = $jsoncontent->result;
         } else {
