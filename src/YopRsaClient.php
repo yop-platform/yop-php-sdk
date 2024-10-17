@@ -210,7 +210,7 @@ class YopRsaClient
      * @param $header
      * @return bool
      */
-    public static function isDefaultHeaderToSign($header): bool
+    public static function isDefaultHeaderToSign($header)
     {
         $header = strtolower(trim($header));
         $defaultHeadersToSign = array();
@@ -224,7 +224,7 @@ class YopRsaClient
      * @param $headers
      * @return string
      */
-    public static function getCanonicalHeaders($headers): string
+    public static function getCanonicalHeaders($headers)
     {
         if (empty($headers)) {
             return "";
@@ -260,7 +260,7 @@ class YopRsaClient
      * @param $YopRequest
      * @return YopResponse
      */
-    public static function upload($methodOrUri, $YopRequest): YopResponse
+    public static function upload($methodOrUri, $YopRequest)
     {
         $content = self::uploadForString($methodOrUri, $YopRequest);
         $response = self::handleRsaResult($YopRequest, $content);
@@ -276,7 +276,7 @@ class YopRsaClient
         return $response;
     }
 
-    public static function richRequest($methodOrUri, $YopRequest): string
+    public static function richRequest($methodOrUri, $YopRequest)
     {
         if (strpos($methodOrUri, YopConfig::$serverRoot)) {
             $methodOrUri = substr($methodOrUri, strlen(YopConfig::$serverRoot) + 1);

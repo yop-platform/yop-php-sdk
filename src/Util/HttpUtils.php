@@ -23,7 +23,7 @@ abstract class HttpUtils
      * @return string the normalized path string.
      * @see #normalize(String)
      */
-    public static function normalizePath($path): string
+    public static function normalizePath($path)
     {
         return str_replace("%2F", "/", HttpUtils::normalize($path));
     }
