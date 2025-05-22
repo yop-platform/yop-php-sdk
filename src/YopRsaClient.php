@@ -81,7 +81,9 @@ class YopRsaClient
         ($privateKey) or die('密钥不可用');
 
         openssl_sign($canonicalRequest, $encode_data, $privateKey, "SHA256");
-        openssl_free_key($privateKey);
+        if (PHP_VERSION_ID < 80000) {
+            openssl_free_key($privateKey);
+        }
 
         $signToBase64 = Base64Url::encode($encode_data);
         $signToBase64 .= '$SHA256';
